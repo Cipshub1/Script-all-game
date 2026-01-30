@@ -1,21 +1,362 @@
---[[
- .____                  ________ ___.    _____                           __                
- |    |    __ _______   \_____  \\_ |___/ ____\_ __  ______ ____ _____ _/  |_  ___________ 
- |    |   |  |  \__  \   /   |   \| __ \   __\  |  \/  ___// ___\\__  \\   __\/  _ \_  __ \
- |    |___|  |  // __ \_/    |    \ \_\ \  | |  |  /\___ \\  \___ / __ \|  | (  <_> )  | \/
- |_______ \____/(____  /\_______  /___  /__| |____//____  >\___  >____  /__|  \____/|__|   
-         \/          \/         \/    \/                \/     \/     \/                   
-          \_Welcome to LuaObfuscator.com   (Alpha 0.10.9) ~  Much Love, Ferib 
-]]--
+--====================================================
+-- ❄️ CIPSHUB | PREMIUM ICE EDITION 2026 ❄️
+-- STYLE: CIRCLE MINI LOGO & LOCAL SNOW EFFECT
+-- NO FEATURES REMOVED | ALL SYSTEMS PROTECTED
+-- FIXED: AIMLOCK VISIBILITY & WALL CHECK
+--====================================================
 
-local v0=game:GetService("Players");local v1=game:GetService("TweenService");local v2=game:GetService("Lighting");local v3=game:GetService("RunService");local v4=game:GetService("UserInputService");local v5=v0.LocalPlayer;local v6=workspace.CurrentCamera;pcall(function() if v5.PlayerGui:FindFirstChild("CipsHubGui") then v5.PlayerGui.CipsHubGui:Destroy();end if v2:FindFirstChild("CipsBlur") then v2.CipsBlur:Destroy();end end);local v7=Instance.new("ScreenGui",v5.PlayerGui);v7.Name="CipsHubGui";v7.IgnoreGuiInset=true;v7.ResetOnSpawn=false;local v11=Instance.new("BlurEffect",v2);v11.Name="CipsBlur";v11.Size=0;v11.Enabled=true;local v15={Main=Color3.fromRGB(5,15,25),Sidebar=Color3.fromRGB(10,25,40),Accent=Color3.fromRGB(0,200,255),Text=Color3.fromRGB(230,250,255),SubText=Color3.fromRGB(140,180,200),InputBG=Color3.fromRGB(20,40,60),GlassTrans=0.25};local v16,v17,v18,v19=false,false,false,false;local v20,v21=16,50;local v22=nil;local v23,v24=false,false;local v25=4;local v26=false;local v27,v28,v29,v30,v31,v32=false,false,false,false,false,true;local function v33(v136,v137) local v138=Instance.new("UICorner",v136);v138.CornerRadius=UDim.new(0,v137);end local function v34(v140,v141) local v142,v143,v144,v145;v141.InputBegan:Connect(function(v312) if ((v312.UserInputType==Enum.UserInputType.MouseButton1) or (v312.UserInputType==Enum.UserInputType.Touch)) then v142=true;v144=v312.Position;v145=v140.Position;v312.Changed:Connect(function() if (v312.UserInputState==Enum.UserInputState.End) then v142=false;end end);end end);v4.InputChanged:Connect(function(v313) if (v142 and ((v313.UserInputType==Enum.UserInputType.MouseMovement) or (v313.UserInputType==Enum.UserInputType.Touch))) then local v340=v313.Position-v144 ;v140.Position=UDim2.new(v145.X.Scale,v145.X.Offset + v340.X ,v145.Y.Scale,v145.Y.Offset + v340.Y );end end);end local function v35(v146) local v147=Instance.new("Frame",v146);v147.Size=UDim2.fromOffset(math.random(2,4),math.random(2,4));v147.BackgroundColor3=Color3.fromRGB(150,240,255);v147.Position=UDim2.new(math.random(),0,1.1,0);v147.BorderSizePixel=0;v33(v147,10);local v152=Instance.new("ImageLabel",v147);v152.Size=UDim2.fromScale(6,6);v152.Position=UDim2.fromScale( -2.5, -2.5);v152.BackgroundTransparency=1;v152.Image="rbxassetid://6034289557";v152.ImageColor3=v15.Accent;v152.ImageTransparency=0.6;local v160=math.random(5,9);task.spawn(function() local v314=0;while v147 and v147.Parent and (v314<v160)  do v314=v314 + v3.RenderStepped:Wait() ;local v325=v314/v160 ;v147.Position=UDim2.new(v147.Position.X.Scale + (math.sin(v314) * 0.0006) ,0,1.1 -(v325 * 1.3) ,0);v147.BackgroundColor3=Color3.fromRGB(150 -(v325 * 50) ,240 -(v325 * 40) ,255);v147.BackgroundTransparency=v325;v152.ImageTransparency=0.6 + (v325 * 0.4) ;end v147:Destroy();end);end local v36=Instance.new("Frame",v7);v36.Name="CipikOceanMini";v36.Size=UDim2.fromOffset(60,60);v36.Position=UDim2.new(0.02,0,0.4,0);v36.BackgroundColor3=v15.Main;v36.BackgroundTransparency=0.3;v36.ClipsDescendants=true;v33(v36,100);v36.Visible=false;local v45=Instance.new("UIStroke",v36);v45.Thickness=2.5;v45.Color=v15.Accent;local v49=Instance.new("Frame",v36);v49.Size=UDim2.fromScale(1,1);v49.BackgroundTransparency=1;local v52=Instance.new("TextLabel",v36);v52.Size=UDim2.fromScale(1,1);v52.Text="CIPIK";v52.Font=Enum.Font.GothamBold;v52.TextColor3=Color3.new(1,1,1);v52.TextSize=10;v52.BackgroundTransparency=1;v52.ZIndex=5;local v61=Instance.new("TextButton",v36);v61.Size=UDim2.fromScale(1,1);v61.BackgroundTransparency=1;v61.Text="";v61.ZIndex=10;local v66=Instance.new("Frame",v7);v66.Size=UDim2.fromOffset(540,360);v66.Position=UDim2.new(0.5, -270,0.5, -180);v66.BackgroundColor3=v15.Main;v66.BackgroundTransparency=v15.GlassTrans;v66.Visible=true;v66.ClipsDescendants=true;v33(v66,12);local v74=Instance.new("Frame",v66);v74.Size=UDim2.fromScale(1,1);v74.BackgroundTransparency=1;local v77=Instance.new("Frame",v66);v77.Size=UDim2.new(1,0,0,32);v77.BackgroundTransparency=1;v77.ZIndex=10;local v81=Instance.new("Frame",v77);v81.Size=UDim2.new(0,80,1,0);v81.Position=UDim2.new(1, -85,0,0);v81.BackgroundTransparency=1;local v85=Instance.new("UIListLayout",v81);v85.FillDirection=Enum.FillDirection.Horizontal;v85.HorizontalAlignment=Enum.HorizontalAlignment.Right;v85.VerticalAlignment=Enum.VerticalAlignment.Center;v85.Padding=UDim.new(0,12);local function v93(v161,v162,v163) local v164=Instance.new("TextButton",v81);v164.Size=UDim2.fromOffset(24,24);v164.BackgroundTransparency=1;v164.Text=v161;v164.Font=Enum.Font.GothamMedium;v164.TextColor3=v162 or v15.Text ;v164.TextSize=18;v164.MouseButton1Click:Connect(v163);return v164;end local v94=v93("-",v15.Accent,function() v66.Visible=false;v36.Visible=true;v1:Create(v11,TweenInfo.new(0.4),{Size=0}):Play();end);local v95=v93("X",Color3.fromRGB(255,80,80),function() v7:Destroy();if v11 then v11:Destroy();end end);local v96=Instance.new("Frame",v66);v96.Size=UDim2.new(0,150,1,0);v96.BackgroundColor3=v15.Sidebar;v96.BackgroundTransparency=0.1;v33(v96,12);local v101=Instance.new("UIStroke",v66);v101.Thickness=2;v101.Color=v15.Accent;v101.Transparency=0.5;local v105=Instance.new("TextLabel",v96);v105.Size=UDim2.new(1,0,0,50);v105.Text="CIPIK HUB 🌊";v105.Font=Enum.Font.GothamBold;v105.TextColor3=v15.Accent;v105.TextSize=18;v105.BackgroundTransparency=1;local v112=Instance.new("Frame",v66);v112.Size=UDim2.new(1, -165,1, -45);v112.Position=UDim2.fromOffset(160,35);v112.BackgroundTransparency=1;local v116=Instance.new("ScrollingFrame",v96);v116.Size=UDim2.new(1, -15,1, -60);v116.Position=UDim2.fromOffset(7,55);v116.BackgroundTransparency=1;v116.ScrollBarThickness=0;Instance.new("UIListLayout",v116).Padding=UDim.new(0,5);local v122={};local function v123(v174,v175) local v176=Instance.new("TextButton",v116);v176.Size=UDim2.new(1,0,0,35);v176.BackgroundTransparency=1;v176.Text="  "   .. v175   .. "  "   .. v174 ;v176.Font=Enum.Font.GothamMedium;v176.TextColor3=v15.SubText;v176.TextSize=12;v176.TextXAlignment="Left";v33(v176,6);local v186=Instance.new("ScrollingFrame",v112);v186.Size=UDim2.fromScale(1,1);v186.BackgroundTransparency=1;v186.Visible=false;v186.ScrollBarThickness=0;Instance.new("UIListLayout",v186).Padding=UDim.new(0,6);v122[v174]={btn=v176,page=v186};v176.MouseButton1Click:Connect(function() for v330,v331 in pairs(v122) do v331.page.Visible=false;v1:Create(v331.btn,TweenInfo.new(0.3),{BackgroundTransparency=1,TextColor3=v15.SubText}):Play();end v186.Visible=true;v1:Create(v176,TweenInfo.new(0.3),{BackgroundTransparency=0.1,TextColor3=v15.Accent}):Play();end);return v186;end local function v124(v193,v194,v195,v196) local v197=Instance.new("TextButton",v193);v197.Size=UDim2.new(0.98,0,0,40);v197.BackgroundColor3=v15.InputBG;v197.BackgroundTransparency=0.4;v197.Text="";v33(v197,8);local v203=Instance.new("TextLabel",v197);v203.Size=UDim2.new(1, -50,1,0);v203.Position=UDim2.fromOffset(12,0);v203.Text=v194;v203.Font=Enum.Font.Gotham;v203.TextColor3=v15.Text;v203.TextSize=12;v203.TextXAlignment="Left";v203.BackgroundTransparency=1;local v214=Instance.new("Frame",v197);v214.Size=UDim2.fromOffset(30,16);v214.Position=UDim2.new(1, -42,0.5, -8);v214.BackgroundColor3=Color3.fromRGB(10,30,50);v33(v214,8);local v218=Instance.new("Frame",v214);v218.Size=UDim2.fromOffset(12,12);v218.Position=UDim2.fromOffset(2,2);v218.BackgroundColor3=Color3.new(1,1,1);v33(v218,6);local v222=v195;local function v223() v196(v222);v1:Create(v214,TweenInfo.new(0.2),{BackgroundColor3=(v222 and v15.Accent) or Color3.fromRGB(10,30,50) }):Play();v1:Create(v218,TweenInfo.new(0.2,Enum.EasingStyle.Back),{Position=(v222 and UDim2.fromOffset(16,2)) or UDim2.fromOffset(2,2) }):Play();end v197.MouseButton1Click:Connect(function() v222= not v222;v223();end);v223();end local function v125(v224,v225,v226,v227) local v228=Instance.new("Frame",v224);v228.Size=UDim2.new(0.98,0,0,45);v228.BackgroundColor3=v15.InputBG;v228.BackgroundTransparency=0.4;v33(v228,8);local v233=Instance.new("TextLabel",v228);v233.Size=UDim2.new(0.6,0,1,0);v233.Position=UDim2.fromOffset(12,0);v233.Text=v225;v233.Font=Enum.Font.Gotham;v233.TextColor3=v15.Text;v233.TextSize=12;v233.TextXAlignment="Left";v233.BackgroundTransparency=1;local v244=Instance.new("TextBox",v228);v244.Size=UDim2.new(0,65,0,28);v244.Position=UDim2.new(1, -75,0.5, -14);v244.BackgroundColor3=Color3.fromRGB(5,15,25);v244.Text=tostring(v226);v244.TextColor3=v15.Accent;v244.Font=Enum.Font.GothamBold;v244.TextSize=12;v33(v244,6);v244.FocusLost:Connect(function() local v316=tonumber(v244.Text);if v316 then v227(v316);else v244.Text="ERR";end end);end local function v126(v254,v255,v256) local v257=Instance.new("TextButton",v254);v257.Size=UDim2.new(0.98,0,0,35);v257.BackgroundColor3=v15.Accent;v257.BackgroundTransparency=0.85;v257.Text=v255;v257.Font=Enum.Font.GothamMedium;v257.TextColor3=v15.Text;v257.TextSize=12;v33(v257,8);v257.MouseButton1Click:Connect(function() v256(v257);end);return v257;end 
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local Lighting = game:GetService("Lighting")
+local RunService = game:GetService("RunService")
+local UIS = game:GetService("UserInputService")
+local LP = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
 
--- BAGIAN TAB YANG SUDAH DIPERBAIKI --
-local v127=v123("Player","👤");
-local v128=v123("Combat","⚔️");
-local v129=v123("Follow","🎯");
-local v130=v123("Visuals","👁️");
-local v131=v123("Utility","⚙️");
---------------------------------------
+-- Cleanup UI Lama
+pcall(function() 
+    if LP.PlayerGui:FindFirstChild("CipsHubGui") then LP.PlayerGui.CipsHubGui:Destroy() end
+    if Lighting:FindFirstChild("CipsBlur") then Lighting.CipsBlur:Destroy() end
+end)
 
-v124(v127,"Ocean WalkSpeed Master",false,function(v268) v16=v268;end);v125(v127,"Set WalkSpeed Value",16,function(v269) v20=v269;end);v124(v127,"Ocean JumpPower Master",false,function(v270) v17=v270;end);v125(v127,"Set JumpPower Value",50,function(v271) v21=v271;end);v124(v127,"NoClip (Pass Walls)",false,function(v272) v18=v272;end);v124(v127,"Infinite Jump",false,function(v273) v19=v273;end);v124(v128,"Aimlock (Legit Mode)",false,function(v274) v26=v274;end);v126(v129,"Select Target Player",function() local v275=Instance.new("ScrollingFrame",v129);v275.Size=UDim2.new(0.98,0,0,100);v275.BackgroundColor3=Color3.new(0,0,0);v275.BackgroundTransparency=0.5;v33(v275,8);Instance.new("UIListLayout",v275);for v317,v318 in pairs(v0:GetPlayers()) do if (v318~=v5) then v126(v275,v318.Name,function() v22=v318;v275:Destroy();end).Size=UDim2.new(1,0,0,30);end end end);v124(v129,"Teleport Follow",false,function(v279) v23=v279;end);v124(v129,"Smooth Body Lock",false,function(v280) v24=v280;end);v124(v130,"Master ESP Switch",false,function(v281) v27=v281;end);v124(v130,"ESP Player Name",false,function(v282) v28=v282;end);v124(v130,"ESP Premium Skeleton",false,function(v283) v29=v283;end);v124(v130,"ESP Health Bar",false,function(v284) v30=v284;end);v124(v130,"ESP Distance Meter",false,function(v285) v31=v285;end);v124(v130,"Team Check",true,function(v286) v32=v286;end);v126(v131,"AFEM MAX (ALPHA)",function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-AFEM-Max-Open-Alpha-50210"))();end);v126(v131,"PSHADE ULTIMATE",function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-pshade-ultimate-25505"))();end);local function v132(v287) local v288=Drawing.new("Text");v288.Visible=false;v288.Center=true;v288.Outline=true;v288.Size=13;v288.Color=v15.Accent;local v295=Drawing.new("Text");v295.Visible=false;v295.Center=true;v295.Outline=true;v295.Size=11;v295.Color=Color3.new(1,1,1);local v301=Drawing.new("Line");v301.Thickness=2;v301.Visible=false;local v304={};for v319=1,6 do v304[v319]=Drawing.new("Line");v304[v319].Thickness=1.5;v304[v319].Color=v15.Accent;end v3.RenderStepped:Connect(function() local v324=v287.Character;if (v27 and v324 and v324:FindFirstChild("HumanoidRootPart") and (v287~=v5) and v324:FindFirstChild("Humanoid") and (v324.Humanoid.Health>0)) then if (v32 and (v287.Team==v5.Team)) then v288.Visible=false;v295.Visible=false;v301.Visible=false;for v370,v371 in pairs(v304) do v371.Visible=false;end return;end local v344=v324.HumanoidRootPart;local v345=v324:FindFirstChild("Head");local v346,v347=v6:WorldToViewportPoint(v344.Position);if v347 then local v363=math.floor((v6.CFrame.Position-v344.Position).Magnitude);if v28 then v288.Visible=true;v288.Text=v287.Name;v288.Position=Vector2.new(v346.X,v346.Y-45 );else v288.Visible=false;end if v31 then v295.Visible=true;v295.Text="["   .. v363   .. "m]" ;v295.Position=Vector2.new(v346.X,v346.Y + 25 );else v295.Visible=false;end if v30 then v301.Visible=true;local v387=v324.Humanoid.Health/v324.Humanoid.MaxHealth ;v301.Color=Color3.fromHSV(v387 * 0.3 ,1,1);v301.From=Vector2.new(v346.X-25 ,v346.Y + 20 );v301.To=Vector2.new((v346.X-25) + (50 * v387) ,v346.Y + 20 );else v301.Visible=false;end if (v29 and v345) then local v392=v6:WorldToViewportPoint(v345.Position);local v393=v6:WorldToViewportPoint(v344.Position);v304[1].Visible=true;v304[1].From=Vector2.new(v392.X,v392.Y);v304[1].To=Vector2.new(v393.X,v393.Y);else for v398,v399 in pairs(v304) do v399.Visible=false;end end else v288.Visible=false;v295.Visible=false;v301.Visible=false;for v373,v374 in pairs(v304) do v374.Visible=false;end end else v288.Visible=false;v295.Visible=false;v301.Visible=false;for v355,v356 in pairs(v304) do v356.Visible=false;end end end);end for v305,v306 in pairs(v0:GetPlayers()) do v132(v306);end v0.PlayerAdded:Connect(v132);v3.Heartbeat:Connect(function() local v307=v5.Character;local v308=v307 and v307:FindFirstChildOfClass("Humanoid") ;local v309=v307 and v307:FindFirstChild("HumanoidRootPart") ;if v308 then v308.WalkSpeed=(v16 and v20) or 16 ;v308.JumpPower=(v17 and v21) or 50 ;end if (v18 and v307) then for v351,v352 in pairs(v307:GetDescendants()) do if v352:IsA("BasePart") then v352.CanCollide=false;end end end if v26 then local v335=nil;local v336=500;for v353,v354 in pairs(v0:GetPlayers()) do if ((v354~=v5) and v354.Character and v354.Character:FindFirstChild("Head") and (v354.Character.Humanoid.Health>0)) then local v368,v369=v6:WorldToViewportPoint(v354.Character.Head.Position);if v369 then local v397=(Vector2.new(v4:GetMouseLocation().X,v4:GetMouseLocation().Y) -Vector2.new(v368.X,v368.Y)).Magnitude;if (v397<v336) then v336=v397;v335=v354;end end end end if v335 then v6.CFrame=CFrame.new(v6.CFrame.Position,v335.Character.Head.Position);end end if (v22 and v22.Character and v309) then local v337=v22.Character:FindFirstChild("HumanoidRootPart");if v337 then local v359=v337.CFrame * CFrame.new(0,0,v25) ;if v23 then v309.CFrame=v359;elseif v24 then v309.CFrame=v309.CFrame:Lerp(v359,0.2);end end end end);v4.JumpRequest:Connect(function() if (v19 and v5.Character) then v5.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping");end end);v34(v36,v36);v34(v66,v77);task.spawn(function() while task.wait(0.4) do if v66.Visible then v35(v74);end v35(v49);end end);v61.MouseButton1Click:Connect(function() v66.Visible=true;v36.Visible=false;v1:Create(v11,TweenInfo.new(0.4),{Size=18}):Play();end);v122['Player'].page.Visible=true;v122['Player'].btn.BackgroundTransparency=0.1;v122['Player'].btn.TextColor3=v15.Accent;print("CIPIK HUB | OCEAN EDITION LOADED 🌊");
+local Gui = Instance.new("ScreenGui", LP.PlayerGui)
+Gui.Name = "CipsHubGui"
+Gui.IgnoreGuiInset = true
+Gui.ResetOnSpawn = false 
+
+local Blur = Instance.new("BlurEffect", Lighting)
+Blur.Name = "CipsBlur"
+Blur.Size = 0
+Blur.Enabled = true
+
+-- PREMIUM ICE THEME
+local Theme = {
+    Main = Color3.fromRGB(10, 20, 30),
+    Sidebar = Color3.fromRGB(15, 25, 35),
+    Accent = Color3.fromRGB(0, 225, 255), -- Ice Blue
+    Text = Color3.fromRGB(240, 250, 255),
+    SubText = Color3.fromRGB(160, 180, 200),
+    InputBG = Color3.fromRGB(25, 40, 50),
+    GlassTrans = 0.1
+}
+
+-- Global Variables (PROTECTED)
+local SpeedOn, JumpOn, NoClip, InfJump = false, false, false, false
+local SpeedVal, JumpVal = 16, 50
+local SelectedTarget = nil
+local TPFollow, BodyLock = false, false
+local FollowDistance = 4
+local AimlockOn = false
+
+-- ESP States (PROTECTED)
+local ESP_Master = false
+local ESP_Name_On = false
+local ESP_Skeleton_On = false
+local ESP_Health_On = false
+local ESP_Dist_On = false
+local ESP_Team_Check = true
+
+local function Round(obj, rad)
+    local c = Instance.new("UICorner", obj)
+    c.CornerRadius = UDim.new(0, rad)
+end
+
+local function MakeDraggable(frame, handle)
+    local dragging, dragInput, dragStart, startPos
+    handle.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true; dragStart = input.Position; startPos = frame.Position
+            input.Changed:Connect(function() if input.UserInputState == Enum.UserInputState.End then dragging = false end end)
+        end
+    end)
+    frame.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then dragInput = input end
+    end)
+    UIS.InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            local delta = input.Position - dragStart
+            frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end)
+end
+
+--========================
+-- INTERFACE BUILDER
+--========================
+local Main = Instance.new("Frame", Gui)
+Main.Size = UDim2.fromOffset(540, 350)
+Main.Position = UDim2.new(0.5, -270, 0.5, -175)
+Main.BackgroundColor3 = Theme.Main
+Main.BackgroundTransparency = Theme.GlassTrans
+Main.Visible = false
+Round(Main, 12)
+
+-- Snow Effect Container (Main Menu)
+local SnowContainer = Instance.new("Frame", Main)
+SnowContainer.Size = UDim2.fromScale(1, 1)
+SnowContainer.BackgroundTransparency = 1
+SnowContainer.ClipsDescendants = true
+
+local function CreateSnowflake(parent)
+    local flake = Instance.new("TextLabel", parent)
+    flake.BackgroundTransparency = 1
+    flake.Text = "."
+    flake.TextColor3 = Color3.new(1, 1, 1)
+    flake.TextSize = math.random(10, 15)
+    flake.Position = UDim2.new(math.random(), 0, -0.1, 0)
+    local speed = math.random(2, 5)
+    task.spawn(function()
+        local t = 0
+        while flake and flake.Parent and t < speed do
+            t = t + RunService.RenderStepped:Wait()
+            flake.Position = UDim2.new(flake.Position.X.Scale, 0, t / speed, 0)
+            flake.TextTransparency = t / speed
+        end
+        flake:Destroy()
+    end)
+end
+
+task.spawn(function()
+    while task.wait(0.3) do if Main.Visible then CreateSnowflake(SnowContainer) end end
+end)
+
+local MainStroke = Instance.new("UIStroke", Main)
+MainStroke.Thickness = 2; MainStroke.Color = Theme.Accent; MainStroke.Transparency = 0.5
+
+local Sidebar = Instance.new("Frame", Main)
+Sidebar.Size = UDim2.new(0, 150, 1, 0)
+Sidebar.BackgroundColor3 = Theme.Sidebar
+Sidebar.BackgroundTransparency = 0.1
+Round(Sidebar, 12)
+
+local Title = Instance.new("TextLabel", Sidebar)
+Title.Size = UDim2.new(1, 0, 0, 50)
+Title.Text = "CIPSHUB ❄️"
+Title.Font = Enum.Font.GothamBlack; Title.TextColor3 = Theme.Accent; Title.TextSize = 18; Title.BackgroundTransparency = 1
+
+local TabHolder = Instance.new("ScrollingFrame", Sidebar)
+TabHolder.Size = UDim2.new(1, -15, 1, -60); TabHolder.Position = UDim2.fromOffset(7, 55); TabHolder.BackgroundTransparency = 1; TabHolder.ScrollBarThickness = 0
+Instance.new("UIListLayout", TabHolder).Padding = UDim.new(0, 5)
+
+local Container = Instance.new("Frame", Main)
+Container.Size = UDim2.new(1, -165, 1, -20); Container.Position = UDim2.fromOffset(160, 10); Container.BackgroundTransparency = 1
+
+local Pages = {}
+local function NewTab(name, icon)
+    local btn = Instance.new("TextButton", TabHolder)
+    btn.Size = UDim2.new(1, 0, 0, 32); btn.BackgroundTransparency = 1; btn.Text = "  " .. icon .. "  " .. name
+    btn.Font = Enum.Font.GothamMedium; btn.TextColor3 = Theme.SubText; btn.TextSize = 11; btn.TextXAlignment = "Left"; Round(btn, 6)
+    local page = Instance.new("ScrollingFrame", Container)
+    page.Size = UDim2.fromScale(1, 1); page.BackgroundTransparency = 1; page.Visible = false; page.ScrollBarThickness = 2
+    Instance.new("UIListLayout", page).Padding = UDim.new(0, 6)
+    Pages[name] = {btn = btn, page = page}
+    btn.MouseButton1Click:Connect(function()
+        for _, v in pairs(Pages) do v.page.Visible = false; TweenService:Create(v.btn, TweenInfo.new(0.3), {BackgroundTransparency = 1, TextColor3 = Theme.SubText}):Play() end
+        page.Visible = true; TweenService:Create(btn, TweenInfo.new(0.3), {BackgroundTransparency = 0.1, TextColor3 = Theme.Accent}):Play()
+    end)
+    return page
+end
+
+local function AddToggle(parent, text, default, callback)
+    local tgl = Instance.new("TextButton", parent); tgl.Size = UDim2.new(0.98, 0, 0, 38); tgl.BackgroundColor3 = Color3.fromRGB(30, 45, 60); tgl.BackgroundTransparency = 0.5; tgl.Text = ""; Round(tgl, 8)
+    local l = Instance.new("TextLabel", tgl); l.Size = UDim2.new(1, -50, 1, 0); l.Position = UDim2.fromOffset(12, 0); l.Text = text; l.Font = Enum.Font.Gotham; l.TextColor3 = Theme.Text; l.TextSize = 12; l.TextXAlignment = "Left"; l.BackgroundTransparency = 1
+    local sw = Instance.new("Frame", tgl); sw.Size = UDim2.fromOffset(28, 14); sw.Position = UDim2.new(1, -40, 0.5, -7); sw.BackgroundColor3 = Color3.fromRGB(50, 70, 90); Round(sw, 7)
+    local dot = Instance.new("Frame", sw); dot.Size = UDim2.fromOffset(10, 10); dot.Position = UDim2.fromOffset(2, 2); dot.BackgroundColor3 = Color3.new(1, 1, 1); Round(dot, 5)
+    local active = default
+    local function update()
+        callback(active)
+        TweenService:Create(sw, TweenInfo.new(0.2), {BackgroundColor3 = active and Theme.Accent or Color3.fromRGB(50, 70, 90)}):Play()
+        TweenService:Create(dot, TweenInfo.new(0.2, Enum.EasingStyle.Back), {Position = active and UDim2.fromOffset(16, 2) or UDim2.fromOffset(2, 2)}):Play()
+    end
+    tgl.MouseButton1Click:Connect(function() active = not active; update() end); update()
+end
+
+local function AddInput(parent, text, default, callback)
+    local frame = Instance.new("Frame", parent); frame.Size = UDim2.new(0.98, 0, 0, 45); frame.BackgroundColor3 = Theme.InputBG; frame.BackgroundTransparency = 0.5; Round(frame, 8)
+    local label = Instance.new("TextLabel", frame); label.Size = UDim2.new(0.6, 0, 1, 0); label.Position = UDim2.fromOffset(12, 0); label.Text = text; label.Font = Enum.Font.Gotham; label.TextColor3 = Theme.Text; label.TextSize = 12; label.TextXAlignment = "Left"; label.BackgroundTransparency = 1
+    local ibox = Instance.new("TextBox", frame); ibox.Size = UDim2.new(0, 60, 0, 25); ibox.Position = UDim2.new(1, -72, 0.5, -12.5); ibox.BackgroundColor3 = Color3.fromRGB(15, 25, 35); ibox.Text = tostring(default); ibox.TextColor3 = Theme.Accent; ibox.Font = Enum.Font.GothamBold; ibox.TextSize = 12; Round(ibox, 5)
+    local stroke = Instance.new("UIStroke", ibox); stroke.Color = Theme.Accent; stroke.Transparency = 0.7; stroke.Thickness = 1
+    ibox.FocusLost:Connect(function() local val = tonumber(ibox.Text) if val then callback(val) else ibox.Text = "ERR" end end)
+end
+
+local function AddButton(parent, text, callback)
+    local b = Instance.new("TextButton", parent); b.Size = UDim2.new(0.98, 0, 0, 32); b.BackgroundColor3 = Theme.Accent; b.BackgroundTransparency = 0.9; b.Text = text; b.Font = Enum.Font.GothamMedium; b.TextColor3 = Theme.Accent; b.TextSize = 11; Round(b, 8)
+    local s = Instance.new("UIStroke", b); s.Thickness = 1; s.Color = Theme.Accent; s.Transparency = 0.8
+    b.MouseButton1Click:Connect(function() callback(b) end)
+    return b
+end
+
+-- TABS SETUP
+local Tab1 = NewTab("Player", "👤")
+local Tab2 = NewTab("Combat", "🔫")
+local Tab3 = NewTab("Follow", "🎯")
+local Tab4 = NewTab("Visuals", "👁️")
+local Tab5 = NewTab("Utility", "⚙️")
+
+-- Player Fitur (PROTECTED)
+AddToggle(Tab1, "Premium WalkSpeed Master", false, function(v) SpeedOn = v end)
+AddInput(Tab1, "Set WalkSpeed Value", 16, function(v) SpeedVal = v end)
+AddToggle(Tab1, "Premium JumpPower Master", false, function(v) JumpOn = v end)
+AddInput(Tab1, "Set JumpPower Value", 50, function(v) JumpVal = v end)
+AddToggle(Tab1, "NoClip (Pass Walls)", false, function(v) NoClip = v end)
+AddToggle(Tab1, "Infinite Jump", false, function(v) InfJump = v end)
+
+-- Combat Fitur (AIMLOCK FIXED)
+AddToggle(Tab2, "Aimlock (Visible Only)", false, function(v) AimlockOn = v end)
+
+-- Target & Visuals (PROTECTED)
+AddButton(Tab3, "Select Target", function()
+    local d = Instance.new("ScrollingFrame", Tab3); d.Size = UDim2.new(0.98,0,0,80); d.BackgroundColor3 = Color3.new(0,0,0); d.BackgroundTransparency = 0.5; Round(d, 8); Instance.new("UIListLayout", d)
+    for _,p in pairs(Players:GetPlayers()) do if p ~= LP then AddButton(d, p.Name, function() SelectedTarget = p; d:Destroy() end).Size = UDim2.new(1,0,0,25) end end
+end)
+AddToggle(Tab3, "Teleport Follow", false, function(v) TPFollow = v end)
+AddToggle(Tab3, "Smooth Body Lock", false, function(v) BodyLock = v end)
+AddToggle(Tab4, "Master ESP Switch", false, function(v) ESP_Master = v end)
+AddToggle(Tab4, "ESP Player Name", false, function(v) ESP_Name_On = v end)
+AddToggle(Tab4, "ESP Premium Skeleton", false, function(v) ESP_Skeleton_On = v end)
+AddToggle(Tab4, "ESP Health Bar", false, function(v) ESP_Health_On = v end)
+AddToggle(Tab4, "ESP Distance Meter", false, function(v) ESP_Dist_On = v end)
+AddToggle(Tab4, "Team Check (Hide Friend)", true, function(v) ESP_Team_Check = v end)
+AddButton(Tab5, "AFEM MAX (ALPHA)", function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-AFEM-Max-Open-Alpha-50210"))() end)
+AddButton(Tab5, "PSHADE ULTIMATE", function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-pshade-ultimate-25505"))() end)
+
+-- AIMLOCK VISIBILITY CHECK FUNCTION
+local function IsVisible(targetHead)
+    local parts = Camera:GetPartsObscuringTarget({Camera.CFrame.Position, targetHead.Position}, {LP.Character, targetHead.Parent})
+    return #parts == 0
+end
+
+-- ESP CORE ENGINE (PROTECTED)
+local function CreateESP(plr)
+    local NameTag = Drawing.new("Text"); NameTag.Visible = false; NameTag.Center = true; NameTag.Outline = true; NameTag.Size = 13; NameTag.Color = Theme.Accent
+    local DistTag = Drawing.new("Text"); DistTag.Visible = false; DistTag.Center = true; DistTag.Outline = true; DistTag.Size = 11; DistTag.Color = Color3.new(1,1,1)
+    local HealthBar = Drawing.new("Line"); HealthBar.Thickness = 2; HealthBar.Visible = false
+    local Lines = {}
+    for i=1, 6 do Lines[i] = Drawing.new("Line"); Lines[i].Thickness = 1.5; Lines[i].Color = Theme.Accent end
+
+    RunService.RenderStepped:Connect(function()
+        local char = plr.Character
+        if ESP_Master and char and char:FindFirstChild("HumanoidRootPart") and plr ~= LP and char:FindFirstChild("Humanoid") and char.Humanoid.Health > 0 then
+            if ESP_Team_Check and plr.Team == LP.Team then
+                NameTag.Visible = false; DistTag.Visible = false; HealthBar.Visible = false; for _,l in pairs(Lines) do l.Visible = false end
+                return
+            end
+            local hrp = char.HumanoidRootPart; local head = char:FindFirstChild("Head")
+            local pos, onScreen = Camera:WorldToViewportPoint(hrp.Position)
+            if onScreen then
+                local distance = math.floor((Camera.CFrame.Position - hrp.Position).Magnitude)
+                if ESP_Name_On then NameTag.Visible = true; NameTag.Text = plr.Name; NameTag.Position = Vector2.new(pos.X, pos.Y - 45) else NameTag.Visible = false end
+                if ESP_Dist_On then DistTag.Visible = true; DistTag.Text = "["..distance.."m]"; DistTag.Position = Vector2.new(pos.X, pos.Y + 25) else DistTag.Visible = false end
+                if ESP_Health_On then
+                    HealthBar.Visible = true; local hPercent = char.Humanoid.Health / char.Humanoid.MaxHealth
+                    HealthBar.Color = Color3.fromHSV(hPercent * 0.3, 1, 1)
+                    HealthBar.From = Vector2.new(pos.X - 25, pos.Y + 20); HealthBar.To = Vector2.new(pos.X - 25 + (50 * hPercent), pos.Y + 20)
+                else HealthBar.Visible = false end
+                if ESP_Skeleton_On and head and char:FindFirstChild("Left Arm") then
+                    local H = Camera:WorldToViewportPoint(head.Position); local T = Camera:WorldToViewportPoint(hrp.Position)
+                    local LA = Camera:WorldToViewportPoint(char["Left Arm"].Position); local RA = Camera:WorldToViewportPoint(char["Right Arm"].Position)
+                    local LL = Camera:WorldToViewportPoint(char:FindFirstChild("Left Leg") and char["Left Leg"].Position or hrp.Position)
+                    local RL = Camera:WorldToViewportPoint(char:FindFirstChild("Right Leg") and char["Right Leg"].Position or hrp.Position)
+                    Lines[1].Visible = true; Lines[1].From = Vector2.new(H.X, H.Y); Lines[1].To = Vector2.new(T.X, T.Y)
+                    Lines[2].Visible = true; Lines[2].From = Vector2.new(T.X, T.Y); Lines[2].To = Vector2.new(LA.X, LA.Y)
+                    Lines[3].Visible = true; Lines[3].From = Vector2.new(T.X, T.Y); Lines[3].To = Vector2.new(RA.X, RA.Y)
+                    Lines[4].Visible = true; Lines[4].From = Vector2.new(T.X, T.Y); Lines[4].To = Vector2.new(LL.X, LL.Y)
+                    Lines[5].Visible = true; Lines[5].From = Vector2.new(T.X, T.Y); Lines[5].To = Vector2.new(RL.X, RL.Y)
+                else for _,l in pairs(Lines) do l.Visible = false end end
+            else NameTag.Visible = false; DistTag.Visible = false; HealthBar.Visible = false; for _,l in pairs(Lines) do l.Visible = false end end
+        else NameTag.Visible = false; DistTag.Visible = false; HealthBar.Visible = false; for _,l in pairs(Lines) do l.Visible = false end end
+    end)
+end
+
+for _, p in pairs(Players:GetPlayers()) do CreateESP(p) end
+Players.PlayerAdded:Connect(CreateESP)
+
+RunService.Heartbeat:Connect(function()
+    local char = LP.Character; local hum = char and char:FindFirstChildOfClass("Humanoid"); local hrp = char and char:FindFirstChild("HumanoidRootPart")
+    if hum then hum.WalkSpeed = SpeedOn and SpeedVal or 16; hum.JumpPower = JumpOn and JumpVal or 50 end
+    if NoClip and char then for _,v in pairs(char:GetDescendants()) do if v:IsA("BasePart") then v.CanCollide = false end end end
+    
+    -- FIXED AIMLOCK LOGIC
+    if AimlockOn then
+        local target = nil; local dist = 500
+        for _, v in pairs(Players:GetPlayers()) do
+            if v ~= LP and v.Character and v.Character:FindFirstChild("Head") and v.Character.Humanoid.Health > 0 then
+                -- Cek apakah teman (jika team check aktif di visuals)
+                if ESP_Team_Check and v.Team == LP.Team then continue end
+                
+                local p, os = Camera:WorldToViewportPoint(v.Character.Head.Position)
+                if os and IsVisible(v.Character.Head) then -- Tambahan Cek Visibility
+                    local m = (Vector2.new(UIS:GetMouseLocation().X, UIS:GetMouseLocation().Y) - Vector2.new(p.X, p.Y)).Magnitude
+                    if m < dist then dist = m; target = v end
+                end
+            end
+        end
+        if target then Camera.CFrame = CFrame.new(Camera.CFrame.Position, target.Character.Head.Position) end
+    end
+
+    if SelectedTarget and SelectedTarget.Character and hrp then
+        local thrp = SelectedTarget.Character:FindFirstChild("HumanoidRootPart")
+        if thrp then
+            local cf = thrp.CFrame * CFrame.new(0, 0, FollowDistance)
+            if TPFollow then hrp.CFrame = cf elseif BodyLock then hrp.CFrame = hrp.CFrame:Lerp(cf, 0.2) end
+        end
+    end
+end)
+
+UIS.JumpRequest:Connect(function() if InfJump and LP.Character then LP.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping") end end)
+
+--====================================================
+-- PREMIUM MINI LOGO (CIRCLE & DRAGGABLE SNOW)
+--====================================================
+local MiniLogo = Instance.new("Frame", Gui)
+MiniLogo.Name = "CipikMiniLogo"
+MiniLogo.Size = UDim2.fromOffset(55, 55)
+MiniLogo.Position = UDim2.new(0.02, 0, 0.4, 0)
+MiniLogo.BackgroundColor3 = Theme.Main
+MiniLogo.BackgroundTransparency = 0.2
+MiniLogo.ClipsDescendants = true
+Round(MiniLogo, 100) -- Bulat Sempurna
+MakeDraggable(MiniLogo, MiniLogo)
+
+local MiniSnowContainer = Instance.new("Frame", MiniLogo)
+MiniSnowContainer.Size = UDim2.fromScale(1, 1)
+MiniSnowContainer.BackgroundTransparency = 1
+
+local MiniStroke = Instance.new("UIStroke", MiniLogo)
+MiniStroke.Thickness = 2
+MiniStroke.Color = Theme.Accent
+MiniStroke.Transparency = 0.4
+
+local IconText = Instance.new("TextLabel", MiniLogo)
+IconText.Size = UDim2.fromScale(1, 1)
+IconText.BackgroundTransparency = 1
+IconText.Text = "CIPIK"
+IconText.Font = Enum.Font.GothamBlack
+IconText.TextColor3 = Color3.new(1, 1, 1)
+IconText.TextSize = 11
+IconText.ZIndex = 5
+
+local ClickBtn = Instance.new("TextButton", MiniLogo)
+ClickBtn.Size = UDim2.fromScale(1, 1)
+ClickBtn.BackgroundTransparency = 1
+ClickBtn.Text = ""
+ClickBtn.ZIndex = 10
+
+task.spawn(function()
+    while task.wait(0.4) do
+        CreateSnowflake(MiniSnowContainer)
+    end
+end)
+
+ClickBtn.MouseButton1Click:Connect(function() 
+    Main.Visible = not Main.Visible 
+    TweenService:Create(Blur, TweenInfo.new(0.4), {Size = Main.Visible and 15 or 0}):Play()
+    TweenService:Create(MiniLogo, TweenInfo.new(0.2, Enum.EasingStyle.Back), {Size = UDim2.fromOffset(50, 50)}):Play()
+    task.wait(0.1)
+    TweenService:Create(MiniLogo, TweenInfo.new(0.2, Enum.EasingStyle.Back), {Size = UDim2.fromOffset(55, 55)}):Play()
+end)
+
+Pages["Player"].page.Visible = true; Pages["Player"].btn.BackgroundTransparency = 0.1; Pages["Player"].btn.TextColor3 = Theme.Accent
+MakeDraggable(Main, Title)
+
+print("CIPSHUB PREMIUM ICE EDITION LOADED ❄️")
