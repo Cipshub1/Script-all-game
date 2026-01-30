@@ -1,8 +1,7 @@
 --====================================================
 -- 🌊 CIPIK HUB | OCEAN BLUE EDITION 2026 🌊
--- STATUS: TOP BAR FIXED | AUTO-HIDE MINI LOGO
--- FIXED: MINI LOGO HIDDEN UNTIL MINIMIZED
--- AIMLOCK: AUTO-LOCK WITH WALL CHECK (FIXED)
+-- STATUS: FIXED STABILITY | UI AUTO-SHOW
+-- AIMLOCK: 100% AUTO-LOCK + WALL CHECK 🔒
 --====================================================
 
 local Players = game:GetService("Players")
@@ -13,20 +12,21 @@ local UIS = game:GetService("UserInputService")
 local LP = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
 
--- Cleanup UI Lama
+-- Cleanup UI Lama (Dipastikan tidak error)
 pcall(function() 
-    if LP.PlayerGui:FindFirstChild("CipsHubGui") then LP.PlayerGui.CipsHubGui:Destroy() end
+    if LP:WaitForChild("PlayerGui"):FindFirstChild("CipsHubGui") then LP.PlayerGui.CipsHubGui:Destroy() end
     if Lighting:FindFirstChild("CipsBlur") then Lighting.CipsBlur:Destroy() end
 end)
 
-local Gui = Instance.new("ScreenGui", LP.PlayerGui)
+local Gui = Instance.new("ScreenGui")
 Gui.Name = "CipsHubGui"
 Gui.IgnoreGuiInset = true
 Gui.ResetOnSpawn = false 
+Gui.Parent = LP:WaitForChild("PlayerGui")
 
 local Blur = Instance.new("BlurEffect", Lighting)
 Blur.Name = "CipsBlur"
-Blur.Size = 0
+Blur.Size = 18 -- Set awal agar langsung terlihat saat menu muncul
 Blur.Enabled = true
 
 -- THEME: OCEAN BLUE GLASS
@@ -71,22 +71,21 @@ local function MakeDraggable(frame, handle)
     end)
 end
 
--- WALL CHECK FUNCTION (NEW FIX)
+-- WALL CHECK / VISIBILITY ENGINE (RAYCASTING)
 local function IsVisible(targetPart)
-    local character = LP.Character
-    if not character then return false end
-    local params = RaycastParams.new()
-    params.FilterType = Enum.RaycastFilterType.Exclude
-    params.FilterDescendantsInstances = {character, targetPart.Parent, Camera}
-    
+    if not LP.Character or not targetPart then return false end
     local origin = Camera.CFrame.Position
-    local direction = (targetPart.Position - origin).Unit * (targetPart.Position - origin).Magnitude
-    local ray = workspace:Raycast(origin, direction, params)
+    local direction = (targetPart.Position - origin)
+    local rayParams = RaycastParams.new()
+    rayParams.FilterType = Enum.RaycastFilterType.Exclude
+    rayParams.FilterDescendantsInstances = {LP.Character, targetPart.Parent, Camera}
     
-    return ray == nil
+    local result = workspace:Raycast(origin, direction, rayParams)
+    return result == nil -- Jika nil, berarti tidak ada tembok yang menghalangi
 end
 
 local function CreateSeaEmber(parent)
+    if not parent then return end
     local ember = Instance.new("Frame", parent)
     ember.Size = UDim2.fromOffset(math.random(2, 4), math.random(2, 4))
     ember.BackgroundColor3 = Color3.fromRGB(150, 240, 255)
@@ -107,12 +106,12 @@ local function CreateSeaEmber(parent)
             ember.BackgroundTransparency = p
             glow.ImageTransparency = 0.6 + (p * 0.4)
         end
-        ember:Destroy()
+        pcall(function() ember:Destroy() end)
     end)
 end
 
 --====================================================
--- 🔘 MINI LOGO "CIPIK" (FIXED: START HIDDEN)
+-- 🔘 MINI LOGO "CIPIK" (PROTECTED)
 --====================================================
 local MiniLogo = Instance.new("Frame", Gui)
 MiniLogo.Name = "CipikOceanMini"
@@ -131,6 +130,7 @@ local ClickBtn = Instance.new("TextButton", MiniLogo); ClickBtn.Size = UDim2.fro
 -- MAIN INTERFACE
 --========================
 local Main = Instance.new("Frame", Gui)
+Main.Name = "MainFrame"
 Main.Size = UDim2.fromOffset(540, 360)
 Main.Position = UDim2.new(0.5, -270, 0.5, -180)
 Main.BackgroundColor3 = Theme.Main
@@ -306,31 +306,32 @@ end
 for _, p in pairs(Players:GetPlayers()) do CreateESP(p) end
 Players.PlayerAdded:Connect(CreateESP)
 
--- HEARTBEAT
+-- HEARTBEAT (FIXED AIMLOCK LOGIC)
 RunService.Heartbeat:Connect(function()
     local char = LP.Character; local hum = char and char:FindFirstChildOfClass("Humanoid"); local hrp = char and char:FindFirstChild("HumanoidRootPart")
+    
     if hum then hum.WalkSpeed = SpeedOn and SpeedVal or 16; hum.JumpPower = JumpOn and JumpVal or 50 end
     if NoClip and char then for _,v in pairs(char:GetDescendants()) do if v:IsA("BasePart") then v.CanCollide = false end end end
     
-    -- UPDATED AIMLOCK WITH WALL CHECK & 100% LOCK
+    -- UPDATED AIMLOCK: 100% LOCK + WALL CHECK
     if AimlockOn then
-        local target = nil; local dist = 1000 -- Max Range
+        local target = nil; local maxDist = 2000 
         for _, v in pairs(Players:GetPlayers()) do
-            if v ~= LP and v.Character and v.Character:FindFirstChild("Head") and v.Character.Humanoid.Health > 0 then
+            if v ~= LP and v.Character and v.Character:FindFirstChild("Head") and v.Character:FindFirstChild("Humanoid") and v.Character.Humanoid.Health > 0 then
                 local head = v.Character.Head
                 local p, os = Camera:WorldToViewportPoint(head.Position)
                 
-                -- Hanya Lock jika musuh di layar DAN terlihat (Tidak terhalang tembok)
+                -- Cek apakah di layar DAN tidak terhalang tembok
                 if os and IsVisible(head) then
-                    local mousePos = Vector2.new(UIS:GetMouseLocation().X, UIS:GetMouseLocation().Y)
-                    local m = (mousePos - Vector2.new(p.X, p.Y)).Magnitude
-                    if m < dist then 
-                        dist = m; target = v 
+                    local m = (Vector2.new(UIS:GetMouseLocation().X, UIS:GetMouseLocation().Y) - Vector2.new(p.X, p.Y)).Magnitude
+                    if m < maxDist then 
+                        maxDist = m; target = v 
                     end
                 end
             end
         end
         if target then 
+            -- 100% Auto-Lock langsung ke kepala
             Camera.CFrame = CFrame.new(Camera.CFrame.Position, target.Character.Head.Position) 
         end
     end
@@ -343,6 +344,7 @@ RunService.Heartbeat:Connect(function()
         end
     end
 end)
+
 UIS.JumpRequest:Connect(function() if InfJump and LP.Character then LP.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping") end end)
 
 -- DRAGGABLE INITIALIZATION
@@ -363,5 +365,6 @@ ClickBtn.MouseButton1Click:Connect(function()
     TweenService:Create(Blur, TweenInfo.new(0.4), {Size = 18}):Play()
 end)
 
+-- DEFAULT TAB
 Pages["Player"].page.Visible = true; Pages["Player"].btn.BackgroundTransparency = 0.1; Pages["Player"].btn.TextColor3 = Theme.Accent
 print("CIPIK HUB | OCEAN EDITION LOADED 🌊")
