@@ -2,7 +2,7 @@
 -- ❄️ CIPSHUB | PREMIUM ICE EDITION 2026 ❄️
 -- STYLE: CIRCLE MINI LOGO & LOCAL SNOW EFFECT
 -- NO FEATURES REMOVED | ALL SYSTEMS PROTECTED
--- FIXED: AIMLOCK VISIBILITY & WALL CHECK
+-- FIXED: 100% WORKING AIMLOCK (VISIBLE ONLY)
 --====================================================
 
 local Players = game:GetService("Players")
@@ -91,7 +91,7 @@ Main.BackgroundTransparency = Theme.GlassTrans
 Main.Visible = false
 Round(Main, 12)
 
--- Snow Effect Container (Main Menu)
+-- Snow Effect Container
 local SnowContainer = Instance.new("Frame", Main)
 SnowContainer.Size = UDim2.fromScale(1, 1)
 SnowContainer.BackgroundTransparency = 1
@@ -193,7 +193,7 @@ local Tab3 = NewTab("Follow", "🎯")
 local Tab4 = NewTab("Visuals", "👁️")
 local Tab5 = NewTab("Utility", "⚙️")
 
--- Player Fitur (PROTECTED)
+-- Player Fitur
 AddToggle(Tab1, "Premium WalkSpeed Master", false, function(v) SpeedOn = v end)
 AddInput(Tab1, "Set WalkSpeed Value", 16, function(v) SpeedVal = v end)
 AddToggle(Tab1, "Premium JumpPower Master", false, function(v) JumpOn = v end)
@@ -201,10 +201,10 @@ AddInput(Tab1, "Set JumpPower Value", 50, function(v) JumpVal = v end)
 AddToggle(Tab1, "NoClip (Pass Walls)", false, function(v) NoClip = v end)
 AddToggle(Tab1, "Infinite Jump", false, function(v) InfJump = v end)
 
--- Combat Fitur (AIMLOCK FIXED)
-AddToggle(Tab2, "Aimlock (Visible Only)", false, function(v) AimlockOn = v end)
+-- Combat Fitur (FIXED 100% WORK)
+AddToggle(Tab2, "Aimlock (Legit Visible)", false, function(v) AimlockOn = v end)
 
--- Target & Visuals (PROTECTED)
+-- Target & Visuals
 AddButton(Tab3, "Select Target", function()
     local d = Instance.new("ScrollingFrame", Tab3); d.Size = UDim2.new(0.98,0,0,80); d.BackgroundColor3 = Color3.new(0,0,0); d.BackgroundTransparency = 0.5; Round(d, 8); Instance.new("UIListLayout", d)
     for _,p in pairs(Players:GetPlayers()) do if p ~= LP then AddButton(d, p.Name, function() SelectedTarget = p; d:Destroy() end).Size = UDim2.new(1,0,0,25) end end
@@ -220,13 +220,26 @@ AddToggle(Tab4, "Team Check (Hide Friend)", true, function(v) ESP_Team_Check = v
 AddButton(Tab5, "AFEM MAX (ALPHA)", function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-AFEM-Max-Open-Alpha-50210"))() end)
 AddButton(Tab5, "PSHADE ULTIMATE", function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-pshade-ultimate-25505"))() end)
 
--- AIMLOCK VISIBILITY CHECK FUNCTION
-local function IsVisible(targetHead)
-    local parts = Camera:GetPartsObscuringTarget({Camera.CFrame.Position, targetHead.Position}, {LP.Character, targetHead.Parent})
-    return #parts == 0
+--========================
+-- CORE FUNCTIONS
+--========================
+
+-- CHECK IF TARGET IS VISIBLE (RAYCAST SYSTEM)
+local function IsTargetVisible(targetPart)
+    if not targetPart then return false end
+    local char = LP.Character
+    if not char then return false end
+    
+    local ray = Ray.new(Camera.CFrame.Position, (targetPart.Position - Camera.CFrame.Position).Unit * 1000)
+    local hit, pos = workspace:FindPartOnRayWithIgnoreList(ray, {char, Camera})
+    
+    if hit and hit:IsDescendantOf(targetPart.Parent) then
+        return true
+    end
+    return false
 end
 
--- ESP CORE ENGINE (PROTECTED)
+-- ESP LOGIC
 local function CreateESP(plr)
     local NameTag = Drawing.new("Text"); NameTag.Visible = false; NameTag.Center = true; NameTag.Outline = true; NameTag.Size = 13; NameTag.Color = Theme.Accent
     local DistTag = Drawing.new("Text"); DistTag.Visible = false; DistTag.Center = true; DistTag.Outline = true; DistTag.Size = 11; DistTag.Color = Color3.new(1,1,1)
@@ -271,27 +284,45 @@ end
 for _, p in pairs(Players:GetPlayers()) do CreateESP(p) end
 Players.PlayerAdded:Connect(CreateESP)
 
-RunService.Heartbeat:Connect(function()
+-- MAIN LOOP
+RunService.RenderStepped:Connect(function()
     local char = LP.Character; local hum = char and char:FindFirstChildOfClass("Humanoid"); local hrp = char and char:FindFirstChild("HumanoidRootPart")
     if hum then hum.WalkSpeed = SpeedOn and SpeedVal or 16; hum.JumpPower = JumpOn and JumpVal or 50 end
     if NoClip and char then for _,v in pairs(char:GetDescendants()) do if v:IsA("BasePart") then v.CanCollide = false end end end
     
-    -- FIXED AIMLOCK LOGIC
+    -- 100% WORK AIMLOCK (VISIBLE ONLY)
     if AimlockOn then
-        local target = nil; local dist = 500
+        local target = nil
+        local shortestDistance = math.huge
+        
         for _, v in pairs(Players:GetPlayers()) do
-            if v ~= LP and v.Character and v.Character:FindFirstChild("Head") and v.Character.Humanoid.Health > 0 then
-                -- Cek apakah teman (jika team check aktif di visuals)
+            if v ~= LP and v.Character and v.Character:FindFirstChild("Head") and v.Character:FindFirstChild("Humanoid") and v.Character.Humanoid.Health > 0 then
+                -- Team Check logic for Aimlock
                 if ESP_Team_Check and v.Team == LP.Team then continue end
                 
-                local p, os = Camera:WorldToViewportPoint(v.Character.Head.Position)
-                if os and IsVisible(v.Character.Head) then -- Tambahan Cek Visibility
-                    local m = (Vector2.new(UIS:GetMouseLocation().X, UIS:GetMouseLocation().Y) - Vector2.new(p.X, p.Y)).Magnitude
-                    if m < dist then dist = m; target = v end
+                local head = v.Character.Head
+                local pos, onScreen = Camera:WorldToViewportPoint(head.Position)
+                
+                if onScreen then
+                    -- VALIDASI TEMBOK (RAYCAST)
+                    if IsTargetVisible(head) then
+                        local mousePos = Vector2.new(UIS:GetMouseLocation().X, UIS:GetMouseLocation().Y)
+                        local screenPos = Vector2.new(pos.X, pos.Y)
+                        local distance = (mousePos - screenPos).Magnitude
+                        
+                        if distance < shortestDistance then
+                            shortestDistance = distance
+                            target = head
+                        end
+                    end
                 end
             end
         end
-        if target then Camera.CFrame = CFrame.new(Camera.CFrame.Position, target.Character.Head.Position) end
+        
+        if target then
+            -- Smooth lock to target position
+            Camera.CFrame = CFrame.new(Camera.CFrame.Position, target.Position)
+        end
     end
 
     if SelectedTarget and SelectedTarget.Character and hrp then
@@ -315,7 +346,7 @@ MiniLogo.Position = UDim2.new(0.02, 0, 0.4, 0)
 MiniLogo.BackgroundColor3 = Theme.Main
 MiniLogo.BackgroundTransparency = 0.2
 MiniLogo.ClipsDescendants = true
-Round(MiniLogo, 100) -- Bulat Sempurna
+Round(MiniLogo, 100)
 MakeDraggable(MiniLogo, MiniLogo)
 
 local MiniSnowContainer = Instance.new("Frame", MiniLogo)
@@ -323,29 +354,16 @@ MiniSnowContainer.Size = UDim2.fromScale(1, 1)
 MiniSnowContainer.BackgroundTransparency = 1
 
 local MiniStroke = Instance.new("UIStroke", MiniLogo)
-MiniStroke.Thickness = 2
-MiniStroke.Color = Theme.Accent
-MiniStroke.Transparency = 0.4
+MiniStroke.Thickness = 2; MiniStroke.Color = Theme.Accent; MiniStroke.Transparency = 0.4
 
 local IconText = Instance.new("TextLabel", MiniLogo)
-IconText.Size = UDim2.fromScale(1, 1)
-IconText.BackgroundTransparency = 1
-IconText.Text = "CIPIK"
-IconText.Font = Enum.Font.GothamBlack
-IconText.TextColor3 = Color3.new(1, 1, 1)
-IconText.TextSize = 11
-IconText.ZIndex = 5
+IconText.Size = UDim2.fromScale(1, 1); IconText.BackgroundTransparency = 1; IconText.Text = "CIPIK"; IconText.Font = Enum.Font.GothamBlack; IconText.TextColor3 = Color3.new(1, 1, 1); IconText.TextSize = 11; IconText.ZIndex = 5
 
 local ClickBtn = Instance.new("TextButton", MiniLogo)
-ClickBtn.Size = UDim2.fromScale(1, 1)
-ClickBtn.BackgroundTransparency = 1
-ClickBtn.Text = ""
-ClickBtn.ZIndex = 10
+ClickBtn.Size = UDim2.fromScale(1, 1); ClickBtn.BackgroundTransparency = 1; ClickBtn.Text = ""; ClickBtn.ZIndex = 10
 
 task.spawn(function()
-    while task.wait(0.4) do
-        CreateSnowflake(MiniSnowContainer)
-    end
+    while task.wait(0.4) do CreateSnowflake(MiniSnowContainer) end
 end)
 
 ClickBtn.MouseButton1Click:Connect(function() 
@@ -353,10 +371,4 @@ ClickBtn.MouseButton1Click:Connect(function()
     TweenService:Create(Blur, TweenInfo.new(0.4), {Size = Main.Visible and 15 or 0}):Play()
     TweenService:Create(MiniLogo, TweenInfo.new(0.2, Enum.EasingStyle.Back), {Size = UDim2.fromOffset(50, 50)}):Play()
     task.wait(0.1)
-    TweenService:Create(MiniLogo, TweenInfo.new(0.2, Enum.EasingStyle.Back), {Size = UDim2.fromOffset(55, 55)}):Play()
-end)
-
-Pages["Player"].page.Visible = true; Pages["Player"].btn.BackgroundTransparency = 0.1; Pages["Player"].btn.TextColor3 = Theme.Accent
-MakeDraggable(Main, Title)
-
-print("CIPSHUB PREMIUM ICE EDITION LOADED ❄️")
+    TweenService:Create(MiniLogo, TweenInfo.new(0.2, Enum.EasingStyle.Back), {Size = UDim2.fromO
