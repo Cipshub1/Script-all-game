@@ -361,4 +361,36 @@ RunService.Heartbeat:Connect(function()
             end
         end
         if target then Camera.CFrame = CFrame.new(Camera.CFrame.Position, target.Character.Head.Position) end
-    en
+    end
+    
+    if SelectedTarget and SelectedTarget.Character and hrp then
+        local thrp = SelectedTarget.Character:FindFirstChild("HumanoidRootPart")
+        if thrp then
+            local cf = thrp.CFrame * CFrame.new(0, 0, FollowDistance)
+            if TPFollow then hrp.CFrame = cf elseif BodyLock then hrp.CFrame = hrp.CFrame:Lerp(cf, 0.2) end
+        end
+    end
+end)
+
+UIS.JumpRequest:Connect(function() if InfJump and LP.Character then LP.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping") end end)
+
+-- DRAGGABLE INITIALIZATION (PRESERVED)
+MakeDraggable(MiniLogo, MiniLogo)
+MakeDraggable(Main, TopBar) 
+
+-- LOOP SEA PARTICLES
+task.spawn(function()
+    while task.wait(0.4) do 
+        if Main.Visible then CreateSeaEmber(MainSeaContainer) end
+        CreateSeaEmber(MiniSeaContainer)
+    end
+end)
+
+ClickBtn.MouseButton1Click:Connect(function()
+    Main.Visible = true
+    MiniLogo.Visible = false 
+    TweenService:Create(Blur, TweenInfo.new(0.4), {Size = 18}):Play()
+end)
+
+Pages["Player"].page.Visible = true; Pages["Player"].btn.BackgroundTransparency = 0.1; Pages["Player"].btn.TextColor3 = Theme.Accent
+print("CIPIK HUB | OCEAN EDITION LOADED 🌊")
