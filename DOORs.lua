@@ -237,29 +237,36 @@ local Tab3 = NewTab("Follow", "🎯")
 local Tab4 = NewTab("Visuals", "👁️")
 local Tab5 = NewTab("Utility", "⚙️")
 
+-- PLAYER TAB
 AddToggle(Tab1, "Ocean WalkSpeed Master", false, function(v) SpeedOn = v end)
 AddInput(Tab1, "Set WalkSpeed Value", 16, function(v) SpeedVal = v end)
 AddToggle(Tab1, "Ocean JumpPower Master", false, function(v) JumpOn = v end)
 AddInput(Tab1, "Set JumpPower Value", 50, function(v) JumpVal = v end)
 AddToggle(Tab1, "NoClip (Pass Walls)", false, function(v) NoClip = v end)
 AddToggle(Tab1, "Infinite Jump", false, function(v) InfJump = v end)
--- FITUR BARU TAB 1
 AddToggle(Tab1, "Invisible (Anti-Visible)", false, function(v) InvisibleOn = v end)
 AddToggle(Tab1, "Freeze Camera", false, function(v) FreezeCamOn = v end)
 
+-- COMBAT TAB
 AddToggle(Tab2, "Aimlock (Visibility Check)", false, function(v) AimlockOn = v end)
+
+-- FOLLOW TAB
 AddButton(Tab3, "Select Target Player", function()
     local d = Instance.new("ScrollingFrame", Tab3); d.Size = UDim2.new(0.98,0,0,100); d.BackgroundColor3 = Color3.new(0,0,0); d.BackgroundTransparency = 0.5; Round(d, 8); Instance.new("UIListLayout", d)
     for _,p in pairs(Players:GetPlayers()) do if p ~= LP then AddButton(d, p.Name, function() SelectedTarget = p; d:Destroy() end).Size = UDim2.new(1,0,0,30) end end
 end)
 AddToggle(Tab3, "Teleport Follow", false, function(v) TPFollow = v end)
 AddToggle(Tab3, "Smooth Body Lock", false, function(v) BodyLock = v end)
+
+-- VISUALS TAB
 AddToggle(Tab4, "Master ESP Switch", false, function(v) ESP_Master = v end)
 AddToggle(Tab4, "ESP Player Name", false, function(v) ESP_Name_On = v end)
 AddToggle(Tab4, "ESP Premium Skeleton", false, function(v) ESP_Skeleton_On = v end)
 AddToggle(Tab4, "ESP Health Bar", false, function(v) ESP_Health_On = v end)
 AddToggle(Tab4, "ESP Distance Meter", false, function(v) ESP_Dist_On = v end)
 AddToggle(Tab4, "Team Check", true, function(v) ESP_Team_Check = v end)
+
+-- UTILITY TAB
 AddButton(Tab5, "AFEM MAX (ALPHA)", function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-AFEM-Max-Open-Alpha-50210"))() end)
 AddButton(Tab5, "PSHADE ULTIMATE", function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-pshade-ultimate-25505"))() end)
 
@@ -273,9 +280,7 @@ local function IsVisible(targetPart)
     return false
 end
 
---====================================================
--- 🦴 FIXED PREMIUM SKELETON ENGINE (R15 & R6)
---====================================================
+-- ESP SYSTEM
 local function CreateESP(plr)
     local NameTag = Drawing.new("Text"); NameTag.Visible = false; NameTag.Center = true; NameTag.Outline = true; NameTag.Size = 13; NameTag.Color = Theme.Accent
     local DistTag = Drawing.new("Text"); DistTag.Visible = false; DistTag.Center = true; DistTag.Outline = true; DistTag.Size = 11; DistTag.Color = Color3.new(1,1,1)
@@ -347,13 +352,26 @@ end
 for _, p in pairs(Players:GetPlayers()) do CreateESP(p) end
 Players.PlayerAdded:Connect(CreateESP)
 
--- HEARTBEAT (SPEED, JUMP, AIMLOCK, ETC)
+-- MAIN HEARTBEAT LOOP
 RunService.Heartbeat:Connect(function()
-    local char = LP.Character; local hum = char and char:FindFirstChildOfClass("Humanoid"); local hrp = char and char:FindFirstChild("HumanoidRootPart")
-    if hum then hum.WalkSpeed = SpeedOn and SpeedVal or 16; hum.JumpPower = JumpOn and JumpVal or 50 end
-    if NoClip and char then for _,v in pairs(char:GetDescendants()) do if v:IsA("BasePart") then v.CanCollide = false end end end
+    local char = LP.Character
+    local hum = char and char:FindFirstChildOfClass("Humanoid")
+    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+
+    -- Movement
+    if hum then 
+        hum.WalkSpeed = SpeedOn and SpeedVal or 16
+        hum.JumpPower = JumpOn and JumpVal or 50 
+    end
+
+    -- NoClip
+    if NoClip and char then 
+        for _,v in pairs(char:GetDescendants()) do 
+            if v:IsA("BasePart") then v.CanCollide = false end 
+        end 
+    end
     
-    -- INVISIBLE LOGIC
+    -- INVISIBLE LOGIC (Local Transparency / Fake Offset)
     if InvisibleOn and hrp then
         local old = hrp.CFrame
         hrp.CFrame = old * CFrame.new(0, -500, 0)
@@ -368,7 +386,51 @@ RunService.Heartbeat:Connect(function()
         Camera.CameraType = Enum.CameraType.Custom
     end
 
+    -- Aimlock
     if AimlockOn then
         local target = nil; local maxDist = 500
         for _, v in pairs(Players:GetPlayers()) do
-            if v ~= LP and v.Charact
+            if v ~= LP and v.Character and v.Character:FindFirstChild("Head") and v.Character.Humanoid.Health > 0 then
+                local p, os = Camera:WorldToViewportPoint(v.Character.Head.Position)
+                if os and IsVisible(v.Character.Head) then
+                    local m = (Vector2.new(UIS:GetMouseLocation().X, UIS:GetMouseLocation().Y) - Vector2.new(p.X, p.Y)).Magnitude
+                    if m < maxDist then maxDist = m; target = v end
+                end
+            end
+        end
+        if target then Camera.CFrame = CFrame.new(Camera.CFrame.Position, target.Character.Head.Position) end
+    end
+
+    -- Target Follow
+    if SelectedTarget and SelectedTarget.Character and hrp then
+        local thrp = SelectedTarget.Character:FindFirstChild("HumanoidRootPart")
+        if thrp then
+            local cf = thrp.CFrame * CFrame.new(0, 0, FollowDistance)
+            if TPFollow then hrp.CFrame = cf elseif BodyLock then hrp.CFrame = hrp.CFrame:Lerp(cf, 0.2) end
+        end
+    end
+end)
+
+-- Initial System Call
+UIS.JumpRequest:Connect(function() if InfJump and LP.Character then LP.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping") end end)
+MakeDraggable(Main, TopBar)
+MakeDraggable(MiniLogo, MiniLogo)
+
+-- Sea Ember Visuals Loop
+task.spawn(function()
+    while true do
+        task.wait(0.5)
+        if Main.Visible then CreateSeaEmber(MainSeaContainer) end
+        if MiniLogo.Visible then CreateSeaEmber(MiniSeaContainer) end
+    end
+end)
+
+ClickBtn.MouseButton1Click:Connect(function()
+    Main.Visible = true; MiniLogo.Visible = false 
+    TweenService:Create(Blur, TweenInfo.new(0.4), {Size = 18}):Play()
+end)
+
+-- Open First Tab
+Pages["Player"].page.Visible = true
+Pages["Player"].btn.BackgroundTransparency = 0.1
+Pages["Player"].btn.TextColor3 = Theme.Accent
