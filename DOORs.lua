@@ -1,7 +1,7 @@
 --====================================================
 -- 🌊 CIPIK HUB | OCEAN BLUE EDITION 2026 🌊
--- STATUS: PREMIUM SKELETON UPDATED 🦴
--- FIXED: SKELETON NOW FOLLOWS FULL BODY ANATOMY
+-- STATUS: PREMIUM SKELETON FIXED 🔒
+-- FIXED: SKELETON COMPATIBILITY FOR ALL AVATARS
 --====================================================
 
 local Players = game:GetService("Players")
@@ -268,24 +268,26 @@ local function IsVisible(targetPart)
 end
 
 --====================================================
--- 🦴 PREMIUM SKELETON ENGINE
+-- 🦴 FIXED PREMIUM SKELETON ENGINE (R15 & R6)
 --====================================================
 local function CreateESP(plr)
     local NameTag = Drawing.new("Text"); NameTag.Visible = false; NameTag.Center = true; NameTag.Outline = true; NameTag.Size = 13; NameTag.Color = Theme.Accent
     local DistTag = Drawing.new("Text"); DistTag.Visible = false; DistTag.Center = true; DistTag.Outline = true; DistTag.Size = 11; DistTag.Color = Color3.new(1,1,1)
     local HealthBar = Drawing.new("Line"); HealthBar.Thickness = 2; HealthBar.Visible = false
     
-    -- Skeleton Bones
     local Bones = {}
-    local boneList = {
+    local skeletonParts = {
         {"Head", "UpperTorso"}, {"UpperTorso", "LowerTorso"},
         {"UpperTorso", "LeftUpperArm"}, {"LeftUpperArm", "LeftLowerArm"}, {"LeftLowerArm", "LeftHand"},
         {"UpperTorso", "RightUpperArm"}, {"RightUpperArm", "RightLowerArm"}, {"RightLowerArm", "RightHand"},
         {"LowerTorso", "LeftUpperLeg"}, {"LeftUpperLeg", "LeftLowerLeg"}, {"LeftLowerLeg", "LeftFoot"},
-        {"LowerTorso", "RightUpperLeg"}, {"RightUpperLeg", "RightLowerLeg"}, {"RightLowerLeg", "RightFoot"}
+        {"LowerTorso", "RightUpperLeg"}, {"RightUpperLeg", "RightLowerLeg"}, {"RightLowerLeg", "RightFoot"},
+        -- R6 Fallback Connections
+        {"Head", "Torso"}, {"Torso", "Left Arm"}, {"Torso", "Right Arm"}, {"Torso", "Left Leg"}, {"Torso", "Right Leg"}
     }
-    for i=1, #boneList do
-        Bones[i] = Drawing.new("Line"); Bones[i].Thickness = 1.5; Bones[i].Color = Theme.Accent; Bones[i].Transparency = 0.8
+
+    for i=1, #skeletonParts do
+        Bones[i] = Drawing.new("Line"); Bones[i].Thickness = 1.5; Bones[i].Color = Theme.Accent; Bones[i].Visible = false; Bones[i].Transparency = 1
     end
 
     RunService.RenderStepped:Connect(function()
@@ -293,39 +295,36 @@ local function CreateESP(plr)
         if ESP_Master and char and char:FindFirstChild("HumanoidRootPart") and plr ~= LP and char:FindFirstChild("Humanoid") and char.Humanoid.Health > 0 then
             if ESP_Team_Check and plr.Team == LP.Team then
                 NameTag.Visible = false; DistTag.Visible = false; HealthBar.Visible = false
-                for _,b in pairs(Bones) do b.Visible = false end
-                return
+                for _,b in pairs(Bones) do b.Visible = false end return
             end
 
             local hrp = char.HumanoidRootPart
             local pos, onScreen = Camera:WorldToViewportPoint(hrp.Position)
             
             if onScreen then
-                local dist = math.floor((Camera.CFrame.Position - hrp.Position).Magnitude)
-                
-                -- Name & Distance
                 if ESP_Name_On then NameTag.Visible = true; NameTag.Text = plr.Name; NameTag.Position = Vector2.new(pos.X, pos.Y - 50) else NameTag.Visible = false end
-                if ESP_Dist_On then DistTag.Visible = true; DistTag.Text = "["..dist.."m]"; DistTag.Position = Vector2.new(pos.X, pos.Y + 30) else DistTag.Visible = false end
+                if ESP_Dist_On then 
+                    local dist = math.floor((Camera.CFrame.Position - hrp.Position).Magnitude)
+                    DistTag.Visible = true; DistTag.Text = "["..dist.."m]"; DistTag.Position = Vector2.new(pos.X, pos.Y + 30) 
+                else DistTag.Visible = false end
                 
-                -- Health Bar
                 if ESP_Health_On then
                     HealthBar.Visible = true; local hp = char.Humanoid.Health / char.Humanoid.MaxHealth
                     HealthBar.Color = Color3.fromHSV(hp * 0.3, 1, 1)
                     HealthBar.From = Vector2.new(pos.X - 25, pos.Y + 25); HealthBar.To = Vector2.new(pos.X - 25 + (50 * hp), pos.Y + 25)
                 else HealthBar.Visible = false end
 
-                -- PREMIUM SKELETON LOGIC
+                -- SKELETON LOGIC
                 if ESP_Skeleton_On then
-                    for i, boneData in pairs(boneList) do
-                        local partA = char:FindFirstChild(boneData[1])
-                        local partB = char:FindFirstChild(boneData[2])
-                        if partA and partB then
-                            local aPos, aOn = Camera:WorldToViewportPoint(partA.Position)
-                            local bPos, bOn = Camera:WorldToViewportPoint(partB.Position)
-                            if aOn and bOn then
+                    for i, pair in pairs(skeletonParts) do
+                        local p1, p2 = char:FindFirstChild(pair[1]), char:FindFirstChild(pair[2])
+                        if p1 and p2 then
+                            local v1, os1 = Camera:WorldToViewportPoint(p1.Position)
+                            local v2, os2 = Camera:WorldToViewportPoint(p2.Position)
+                            if os1 and os2 then
                                 Bones[i].Visible = true
-                                Bones[i].From = Vector2.new(aPos.X, aPos.Y)
-                                Bones[i].To = Vector2.new(bPos.X, bPos.Y)
+                                Bones[i].From = Vector2.new(v1.X, v1.Y)
+                                Bones[i].To = Vector2.new(v2.X, v2.Y)
                             else Bones[i].Visible = false end
                         else Bones[i].Visible = false end
                     end
@@ -341,11 +340,10 @@ local function CreateESP(plr)
     end)
 end
 
--- Initialize ESP for all
 for _, p in pairs(Players:GetPlayers()) do CreateESP(p) end
 Players.PlayerAdded:Connect(CreateESP)
 
--- HEARTBEAT
+-- HEARTBEAT (SPEED, JUMP, AIMLOCK, ETC)
 RunService.Heartbeat:Connect(function()
     local char = LP.Character; local hum = char and char:FindFirstChildOfClass("Humanoid"); local hrp = char and char:FindFirstChild("HumanoidRootPart")
     if hum then hum.WalkSpeed = SpeedOn and SpeedVal or 16; hum.JumpPower = JumpOn and JumpVal or 50 end
@@ -356,11 +354,9 @@ RunService.Heartbeat:Connect(function()
         for _, v in pairs(Players:GetPlayers()) do
             if v ~= LP and v.Character and v.Character:FindFirstChild("Head") and v.Character.Humanoid.Health > 0 then
                 local p, os = Camera:WorldToViewportPoint(v.Character.Head.Position)
-                if os then
-                    if IsVisible(v.Character.Head) then
-                        local m = (Vector2.new(UIS:GetMouseLocation().X, UIS:GetMouseLocation().Y) - Vector2.new(p.X, p.Y)).Magnitude
-                        if m < maxDist then maxDist = m; target = v end
-                    end
+                if os and IsVisible(v.Character.Head) then
+                    local m = (Vector2.new(UIS:GetMouseLocation().X, UIS:GetMouseLocation().Y) - Vector2.new(p.X, p.Y)).Magnitude
+                    if m < maxDist then maxDist = m; target = v end
                 end
             end
         end
@@ -397,4 +393,4 @@ ClickBtn.MouseButton1Click:Connect(function()
 end)
 
 Pages["Player"].page.Visible = true; Pages["Player"].btn.BackgroundTransparency = 0.1; Pages["Player"].btn.TextColor3 = Theme.Accent
-print("CIPIK HUB | PREMIUM SKELETON LOADED 🦴🌊")
+print("CIPIK HUB | OCEAN EDITION LOADED 🌊")
