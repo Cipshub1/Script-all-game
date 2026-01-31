@@ -2,6 +2,7 @@
 -- 🌊 CIPIK HUB | OCEAN BLUE EDITION 2026 🌊
 -- STATUS: PREMIUM SKELETON FIXED 🔒
 -- FIXED: SKELETON COMPATIBILITY FOR ALL AVATARS
+-- ADDED: INVISIBLE & FREEZE CAMERA (TAB PLAYER)
 --====================================================
 
 local Players = game:GetService("Players")
@@ -42,6 +43,7 @@ local Theme = {
 -- Global Variables
 local SpeedOn, JumpOn, NoClip, InfJump = false, false, false, false
 local SpeedVal, JumpVal = 16, 50
+local InvisibleOn, FreezeCamOn = false, false
 local SelectedTarget = nil
 local TPFollow, BodyLock = false, false
 local FollowDistance = 4
@@ -241,6 +243,10 @@ AddToggle(Tab1, "Ocean JumpPower Master", false, function(v) JumpOn = v end)
 AddInput(Tab1, "Set JumpPower Value", 50, function(v) JumpVal = v end)
 AddToggle(Tab1, "NoClip (Pass Walls)", false, function(v) NoClip = v end)
 AddToggle(Tab1, "Infinite Jump", false, function(v) InfJump = v end)
+-- FITUR BARU TAB 1
+AddToggle(Tab1, "Invisible (Anti-Visible)", false, function(v) InvisibleOn = v end)
+AddToggle(Tab1, "Freeze Camera", false, function(v) FreezeCamOn = v end)
+
 AddToggle(Tab2, "Aimlock (Visibility Check)", false, function(v) AimlockOn = v end)
 AddButton(Tab3, "Select Target Player", function()
     local d = Instance.new("ScrollingFrame", Tab3); d.Size = UDim2.new(0.98,0,0,100); d.BackgroundColor3 = Color3.new(0,0,0); d.BackgroundTransparency = 0.5; Round(d, 8); Instance.new("UIListLayout", d)
@@ -282,7 +288,6 @@ local function CreateESP(plr)
         {"UpperTorso", "RightUpperArm"}, {"RightUpperArm", "RightLowerArm"}, {"RightLowerArm", "RightHand"},
         {"LowerTorso", "LeftUpperLeg"}, {"LeftUpperLeg", "LeftLowerLeg"}, {"LeftLowerLeg", "LeftFoot"},
         {"LowerTorso", "RightUpperLeg"}, {"RightUpperLeg", "RightLowerLeg"}, {"RightLowerLeg", "RightFoot"},
-        -- R6 Fallback Connections
         {"Head", "Torso"}, {"Torso", "Left Arm"}, {"Torso", "Right Arm"}, {"Torso", "Left Leg"}, {"Torso", "Right Leg"}
     }
 
@@ -314,7 +319,6 @@ local function CreateESP(plr)
                     HealthBar.From = Vector2.new(pos.X - 25, pos.Y + 25); HealthBar.To = Vector2.new(pos.X - 25 + (50 * hp), pos.Y + 25)
                 else HealthBar.Visible = false end
 
-                -- SKELETON LOGIC
                 if ESP_Skeleton_On then
                     for i, pair in pairs(skeletonParts) do
                         local p1, p2 = char:FindFirstChild(pair[1]), char:FindFirstChild(pair[2])
@@ -349,48 +353,22 @@ RunService.Heartbeat:Connect(function()
     if hum then hum.WalkSpeed = SpeedOn and SpeedVal or 16; hum.JumpPower = JumpOn and JumpVal or 50 end
     if NoClip and char then for _,v in pairs(char:GetDescendants()) do if v:IsA("BasePart") then v.CanCollide = false end end end
     
+    -- INVISIBLE LOGIC
+    if InvisibleOn and hrp then
+        local old = hrp.CFrame
+        hrp.CFrame = old * CFrame.new(0, -500, 0)
+        RunService.RenderStepped:Wait()
+        hrp.CFrame = old
+    end
+
+    -- FREEZE CAMERA LOGIC
+    if FreezeCamOn then
+        Camera.CameraType = Enum.CameraType.Scriptable
+    else
+        Camera.CameraType = Enum.CameraType.Custom
+    end
+
     if AimlockOn then
         local target = nil; local maxDist = 500
         for _, v in pairs(Players:GetPlayers()) do
-            if v ~= LP and v.Character and v.Character:FindFirstChild("Head") and v.Character.Humanoid.Health > 0 then
-                local p, os = Camera:WorldToViewportPoint(v.Character.Head.Position)
-                if os and IsVisible(v.Character.Head) then
-                    local m = (Vector2.new(UIS:GetMouseLocation().X, UIS:GetMouseLocation().Y) - Vector2.new(p.X, p.Y)).Magnitude
-                    if m < maxDist then maxDist = m; target = v end
-                end
-            end
-        end
-        if target then Camera.CFrame = CFrame.new(Camera.CFrame.Position, target.Character.Head.Position) end
-    end
-    
-    if SelectedTarget and SelectedTarget.Character and hrp then
-        local thrp = SelectedTarget.Character:FindFirstChild("HumanoidRootPart")
-        if thrp then
-            local cf = thrp.CFrame * CFrame.new(0, 0, FollowDistance)
-            if TPFollow then hrp.CFrame = cf elseif BodyLock then hrp.CFrame = hrp.CFrame:Lerp(cf, 0.2) end
-        end
-    end
-end)
-
-UIS.JumpRequest:Connect(function() if InfJump and LP.Character then LP.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping") end end)
-
--- DRAGGABLE INITIALIZATION (PRESERVED)
-MakeDraggable(MiniLogo, MiniLogo)
-MakeDraggable(Main, TopBar) 
-
--- LOOP SEA PARTICLES
-task.spawn(function()
-    while task.wait(0.4) do 
-        if Main.Visible then CreateSeaEmber(MainSeaContainer) end
-        CreateSeaEmber(MiniSeaContainer)
-    end
-end)
-
-ClickBtn.MouseButton1Click:Connect(function()
-    Main.Visible = true
-    MiniLogo.Visible = false 
-    TweenService:Create(Blur, TweenInfo.new(0.4), {Size = 18}):Play()
-end)
-
-Pages["Player"].page.Visible = true; Pages["Player"].btn.BackgroundTransparency = 0.1; Pages["Player"].btn.TextColor3 = Theme.Accent
-print("CIPIK HUB | OCEAN EDITION LOADED 🌊")
+            if v ~= LP and v.Charact
