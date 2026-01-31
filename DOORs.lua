@@ -1,7 +1,7 @@
 --====================================================
 -- 🌊 CIPIK HUB | OCEAN BLUE EDITION 2026 🌊
--- STATUS: AIMLOCK VISIBILITY FIXED 🔒
--- FIXED: AIMLOCK ONLY LOCKS ON VISIBLE TARGETS
+-- STATUS: PREMIUM SKELETON UPDATED 🦴
+-- FIXED: SKELETON NOW FOLLOWS FULL BODY ANATOMY
 --====================================================
 
 local Players = game:GetService("Players")
@@ -262,49 +262,86 @@ local function IsVisible(targetPart)
     local rayParam = RaycastParams.new()
     rayParam.FilterType = Enum.RaycastFilterType.Exclude
     rayParam.FilterDescendantsInstances = {LP.Character, Camera}
-    
     local rayResult = workspace:Raycast(Camera.CFrame.Position, (targetPart.Position - Camera.CFrame.Position).Unit * 1000, rayParam)
-    
-    if rayResult and rayResult.Instance:IsDescendantOf(targetPart.Parent) then
-        return true
-    end
+    if rayResult and rayResult.Instance:IsDescendantOf(targetPart.Parent) then return true end
     return false
 end
 
--- ESP ENGINE
+--====================================================
+-- 🦴 PREMIUM SKELETON ENGINE
+--====================================================
 local function CreateESP(plr)
     local NameTag = Drawing.new("Text"); NameTag.Visible = false; NameTag.Center = true; NameTag.Outline = true; NameTag.Size = 13; NameTag.Color = Theme.Accent
     local DistTag = Drawing.new("Text"); DistTag.Visible = false; DistTag.Center = true; DistTag.Outline = true; DistTag.Size = 11; DistTag.Color = Color3.new(1,1,1)
     local HealthBar = Drawing.new("Line"); HealthBar.Thickness = 2; HealthBar.Visible = false
-    local Lines = {}
-    for i=1, 6 do Lines[i] = Drawing.new("Line"); Lines[i].Thickness = 1.5; Lines[i].Color = Theme.Accent end
+    
+    -- Skeleton Bones
+    local Bones = {}
+    local boneList = {
+        {"Head", "UpperTorso"}, {"UpperTorso", "LowerTorso"},
+        {"UpperTorso", "LeftUpperArm"}, {"LeftUpperArm", "LeftLowerArm"}, {"LeftLowerArm", "LeftHand"},
+        {"UpperTorso", "RightUpperArm"}, {"RightUpperArm", "RightLowerArm"}, {"RightLowerArm", "RightHand"},
+        {"LowerTorso", "LeftUpperLeg"}, {"LeftUpperLeg", "LeftLowerLeg"}, {"LeftLowerLeg", "LeftFoot"},
+        {"LowerTorso", "RightUpperLeg"}, {"RightUpperLeg", "RightLowerLeg"}, {"RightLowerLeg", "RightFoot"}
+    }
+    for i=1, #boneList do
+        Bones[i] = Drawing.new("Line"); Bones[i].Thickness = 1.5; Bones[i].Color = Theme.Accent; Bones[i].Transparency = 0.8
+    end
 
     RunService.RenderStepped:Connect(function()
         local char = plr.Character
         if ESP_Master and char and char:FindFirstChild("HumanoidRootPart") and plr ~= LP and char:FindFirstChild("Humanoid") and char.Humanoid.Health > 0 then
             if ESP_Team_Check and plr.Team == LP.Team then
-                NameTag.Visible = false; DistTag.Visible = false; HealthBar.Visible = false; for _,l in pairs(Lines) do l.Visible = false end
+                NameTag.Visible = false; DistTag.Visible = false; HealthBar.Visible = false
+                for _,b in pairs(Bones) do b.Visible = false end
                 return
             end
-            local hrp = char.HumanoidRootPart; local head = char:FindFirstChild("Head")
+
+            local hrp = char.HumanoidRootPart
             local pos, onScreen = Camera:WorldToViewportPoint(hrp.Position)
+            
             if onScreen then
                 local dist = math.floor((Camera.CFrame.Position - hrp.Position).Magnitude)
-                if ESP_Name_On then NameTag.Visible = true; NameTag.Text = plr.Name; NameTag.Position = Vector2.new(pos.X, pos.Y - 45) else NameTag.Visible = false end
-                if ESP_Dist_On then DistTag.Visible = true; DistTag.Text = "["..dist.."m]"; DistTag.Position = Vector2.new(pos.X, pos.Y + 25) else DistTag.Visible = false end
+                
+                -- Name & Distance
+                if ESP_Name_On then NameTag.Visible = true; NameTag.Text = plr.Name; NameTag.Position = Vector2.new(pos.X, pos.Y - 50) else NameTag.Visible = false end
+                if ESP_Dist_On then DistTag.Visible = true; DistTag.Text = "["..dist.."m]"; DistTag.Position = Vector2.new(pos.X, pos.Y + 30) else DistTag.Visible = false end
+                
+                -- Health Bar
                 if ESP_Health_On then
                     HealthBar.Visible = true; local hp = char.Humanoid.Health / char.Humanoid.MaxHealth
                     HealthBar.Color = Color3.fromHSV(hp * 0.3, 1, 1)
-                    HealthBar.From = Vector2.new(pos.X - 25, pos.Y + 20); HealthBar.To = Vector2.new(pos.X - 25 + (50 * hp), pos.Y + 20)
+                    HealthBar.From = Vector2.new(pos.X - 25, pos.Y + 25); HealthBar.To = Vector2.new(pos.X - 25 + (50 * hp), pos.Y + 25)
                 else HealthBar.Visible = false end
-                if ESP_Skeleton_On and head then
-                    local H = Camera:WorldToViewportPoint(head.Position); local T = Camera:WorldToViewportPoint(hrp.Position)
-                    Lines[1].Visible = true; Lines[1].From = Vector2.new(H.X, H.Y); Lines[1].To = Vector2.new(T.X, T.Y)
-                else for _,l in pairs(Lines) do l.Visible = false end end
-            else NameTag.Visible = false; DistTag.Visible = false; HealthBar.Visible = false; for _,l in pairs(Lines) do l.Visible = false end end
-        else NameTag.Visible = false; DistTag.Visible = false; HealthBar.Visible = false; for _,l in pairs(Lines) do l.Visible = false end end
+
+                -- PREMIUM SKELETON LOGIC
+                if ESP_Skeleton_On then
+                    for i, boneData in pairs(boneList) do
+                        local partA = char:FindFirstChild(boneData[1])
+                        local partB = char:FindFirstChild(boneData[2])
+                        if partA and partB then
+                            local aPos, aOn = Camera:WorldToViewportPoint(partA.Position)
+                            local bPos, bOn = Camera:WorldToViewportPoint(partB.Position)
+                            if aOn and bOn then
+                                Bones[i].Visible = true
+                                Bones[i].From = Vector2.new(aPos.X, aPos.Y)
+                                Bones[i].To = Vector2.new(bPos.X, bPos.Y)
+                            else Bones[i].Visible = false end
+                        else Bones[i].Visible = false end
+                    end
+                else for _,b in pairs(Bones) do b.Visible = false end end
+            else
+                NameTag.Visible = false; DistTag.Visible = false; HealthBar.Visible = false
+                for _,b in pairs(Bones) do b.Visible = false end
+            end
+        else
+            NameTag.Visible = false; DistTag.Visible = false; HealthBar.Visible = false
+            for _,b in pairs(Bones) do b.Visible = false end
+        end
     end)
 end
+
+-- Initialize ESP for all
 for _, p in pairs(Players:GetPlayers()) do CreateESP(p) end
 Players.PlayerAdded:Connect(CreateESP)
 
@@ -318,10 +355,8 @@ RunService.Heartbeat:Connect(function()
         local target = nil; local maxDist = 500
         for _, v in pairs(Players:GetPlayers()) do
             if v ~= LP and v.Character and v.Character:FindFirstChild("Head") and v.Character.Humanoid.Health > 0 then
-                -- Check Screen Position
                 local p, os = Camera:WorldToViewportPoint(v.Character.Head.Position)
                 if os then
-                    -- FIX: Check if head is visible (not behind wall)
                     if IsVisible(v.Character.Head) then
                         local m = (Vector2.new(UIS:GetMouseLocation().X, UIS:GetMouseLocation().Y) - Vector2.new(p.X, p.Y)).Magnitude
                         if m < maxDist then maxDist = m; target = v end
@@ -340,6 +375,7 @@ RunService.Heartbeat:Connect(function()
         end
     end
 end)
+
 UIS.JumpRequest:Connect(function() if InfJump and LP.Character then LP.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping") end end)
 
 -- DRAGGABLE INITIALIZATION (PRESERVED)
@@ -361,4 +397,4 @@ ClickBtn.MouseButton1Click:Connect(function()
 end)
 
 Pages["Player"].page.Visible = true; Pages["Player"].btn.BackgroundTransparency = 0.1; Pages["Player"].btn.TextColor3 = Theme.Accent
-print("CIPIK HUB | OCEAN EDITION LOADED 🌊")
+print("CIPIK HUB | PREMIUM SKELETON LOADED 🦴🌊")
