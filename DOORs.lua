@@ -1,7 +1,7 @@
 --====================================================
 -- 🌊 CIPIK HUB | OCEAN BLUE EDITION 2026 🌊
--- STATUS: PREMIUM SKELETON FIXED & MAGIC BULLET ADDED
--- FIXED: SKELETON COMPATIBILITY & COMBAT ENHANCED 🔒
+-- STATUS: PREMIUM SKELETON FIXED 🔒
+-- FIXED: SKELETON COMPATIBILITY FOR ALL AVATARS
 --====================================================
 
 local Players = game:GetService("Players")
@@ -45,7 +45,7 @@ local SpeedVal, JumpVal = 16, 50
 local SelectedTarget = nil
 local TPFollow, BodyLock = false, false
 local FollowDistance = 4
-local AimlockOn, MagicBullet = false, false
+local AimlockOn = false
 local ESP_Master, ESP_Name_On, ESP_Skeleton_On, ESP_Health_On, ESP_Dist_On, ESP_Team_Check = false, false, false, false, false, true
 
 local function Round(obj, rad)
@@ -241,11 +241,7 @@ AddToggle(Tab1, "Ocean JumpPower Master", false, function(v) JumpOn = v end)
 AddInput(Tab1, "Set JumpPower Value", 50, function(v) JumpVal = v end)
 AddToggle(Tab1, "NoClip (Pass Walls)", false, function(v) NoClip = v end)
 AddToggle(Tab1, "Infinite Jump", false, function(v) InfJump = v end)
-
--- TABS COMBAT (MAGIC BULLET ADDED)
 AddToggle(Tab2, "Aimlock (Visibility Check)", false, function(v) AimlockOn = v end)
-AddToggle(Tab2, "Ocean Magic Bullet (Hit Wall)", false, function(v) MagicBullet = v end)
-
 AddButton(Tab3, "Select Target Player", function()
     local d = Instance.new("ScrollingFrame", Tab3); d.Size = UDim2.new(0.98,0,0,100); d.BackgroundColor3 = Color3.new(0,0,0); d.BackgroundTransparency = 0.5; Round(d, 8); Instance.new("UIListLayout", d)
     for _,p in pairs(Players:GetPlayers()) do if p ~= LP then AddButton(d, p.Name, function() SelectedTarget = p; d:Destroy() end).Size = UDim2.new(1,0,0,30) end end
@@ -286,6 +282,7 @@ local function CreateESP(plr)
         {"UpperTorso", "RightUpperArm"}, {"RightUpperArm", "RightLowerArm"}, {"RightLowerArm", "RightHand"},
         {"LowerTorso", "LeftUpperLeg"}, {"LeftUpperLeg", "LeftLowerLeg"}, {"LeftLowerLeg", "LeftFoot"},
         {"LowerTorso", "RightUpperLeg"}, {"RightUpperLeg", "RightLowerLeg"}, {"RightLowerLeg", "RightFoot"},
+        -- R6 Fallback Connections
         {"Head", "Torso"}, {"Torso", "Left Arm"}, {"Torso", "Right Arm"}, {"Torso", "Left Leg"}, {"Torso", "Right Leg"}
     }
 
@@ -317,6 +314,7 @@ local function CreateESP(plr)
                     HealthBar.From = Vector2.new(pos.X - 25, pos.Y + 25); HealthBar.To = Vector2.new(pos.X - 25 + (50 * hp), pos.Y + 25)
                 else HealthBar.Visible = false end
 
+                -- SKELETON LOGIC
                 if ESP_Skeleton_On then
                     for i, pair in pairs(skeletonParts) do
                         local p1, p2 = char:FindFirstChild(pair[1]), char:FindFirstChild(pair[2])
@@ -345,36 +343,6 @@ end
 for _, p in pairs(Players:GetPlayers()) do CreateESP(p) end
 Players.PlayerAdded:Connect(CreateESP)
 
---====================================================
--- 🎯 MAGIC BULLET ENGINE (HIT BEHIND WALLS)
---====================================================
-local function GetClosestTarget()
-    local target = nil; local maxDist = 2000
-    for _, v in pairs(Players:GetPlayers()) do
-        if v ~= LP and v.Character and v.Character:FindFirstChild("Head") and v.Character.Humanoid.Health > 0 then
-            if ESP_Team_Check and v.Team == LP.Team then continue end
-            local pos, os = Camera:WorldToViewportPoint(v.Character.Head.Position)
-            if os then
-                local m = (Vector2.new(UIS:GetMouseLocation().X, UIS:GetMouseLocation().Y) - Vector2.new(pos.X, pos.Y)).Magnitude
-                if m < maxDist then maxDist = m; target = v end
-            end
-        end
-    end
-    return target
-end
-
--- MAGIC BULLET HOOK
-local OldIndex = nil
-OldIndex = hookmetamethod(game, "__index", function(self, index)
-    if not checkcaller() and MagicBullet and index == "Hit" then
-        local t = GetClosestTarget()
-        if t and t.Character and t.Character:FindFirstChild("Head") then
-            return t.Character.Head.CFrame
-        end
-    end
-    return OldIndex(self, index)
-end)
-
 -- HEARTBEAT (SPEED, JUMP, AIMLOCK, ETC)
 RunService.Heartbeat:Connect(function()
     local char = LP.Character; local hum = char and char:FindFirstChildOfClass("Humanoid"); local hrp = char and char:FindFirstChild("HumanoidRootPart")
@@ -393,35 +361,4 @@ RunService.Heartbeat:Connect(function()
             end
         end
         if target then Camera.CFrame = CFrame.new(Camera.CFrame.Position, target.Character.Head.Position) end
-    end
-    
-    if SelectedTarget and SelectedTarget.Character and hrp then
-        local thrp = SelectedTarget.Character:FindFirstChild("HumanoidRootPart")
-        if thrp then
-            local cf = thrp.CFrame * CFrame.new(0, 0, FollowDistance)
-            if TPFollow then hrp.CFrame = cf elseif BodyLock then hrp.CFrame = hrp.CFrame:Lerp(cf, 0.2) end
-        end
-    end
-end)
-
-UIS.JumpRequest:Connect(function() if InfJump and LP.Character then LP.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping") end end)
-
--- DRAGGABLE INITIALIZATION
-MakeDraggable(MiniLogo, MiniLogo)
-MakeDraggable(Main, TopBar) 
-
--- LOOP SEA PARTICLES
-task.spawn(function()
-    while task.wait(0.4) do 
-        if Main.Visible then CreateSeaEmber(MainSeaContainer) end
-        CreateSeaEmber(MiniSeaContainer)
-    end
-end)
-
-ClickBtn.MouseButton1Click:Connect(function()
-    Main.Visible = true; MiniLogo.Visible = false 
-    TweenService:Create(Blur, TweenInfo.new(0.4), {Size = 18}):Play()
-end)
-
-Pages["Player"].page.Visible = true; Pages["Player"].btn.BackgroundTransparency = 0.1; Pages["Player"].btn.TextColor3 = Theme.Accent
-print("CIPIK HUB | MAGIC BULLET & SKELETON READY 🌊🔒")
+    en
