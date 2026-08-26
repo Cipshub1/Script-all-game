@@ -1,0 +1,623 @@
+--====================================================
+-- 🌊 CIPHUB V99 | UPDATED TABS 🌊
+-- STATUS: UI BASE + SETTINGS + PARTICLES + FIXED ESP & CAMERA FREEZE
+--====================================================
+
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local Lighting = game:GetService("Lighting")
+local RunService = game:GetService("RunService")
+local UIS = game:GetService("UserInputService")
+local LP = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+
+-- Cleanup UI Lama
+pcall(function() 
+    if LP.PlayerGui:FindFirstChild("CiphubV99") then LP.PlayerGui.CiphubV99:Destroy() end
+    if Lighting:FindFirstChild("CipsBlur") then Lighting.CipsBlur:Destroy() end
+end)
+
+local Gui = Instance.new("ScreenGui")
+Gui.Name = "CiphubV99"
+Gui.Parent = LP:WaitForChild("PlayerGui")
+Gui.ResetOnSpawn = false 
+
+local Blur = Instance.new("BlurEffect", Lighting)
+Blur.Name = "CipsBlur"
+Blur.Size = 10
+
+local Theme = {
+    Main = Color3.fromRGB(15, 15, 15),
+    Sidebar = Color3.fromRGB(10, 10, 10),
+    Accent = Color3.fromRGB(0, 200, 255),
+    Text = Color3.fromRGB(255, 255, 255),
+    SubText = Color3.fromRGB(180, 180, 180),
+    Stroke = Color3.fromRGB(60, 60, 60),
+    Close = Color3.fromRGB(255, 95, 87),
+    Minimize = Color3.fromRGB(255, 189, 46),
+    Expand = Color3.fromRGB(39, 201, 63),
+    Button = Color3.fromRGB(40, 40, 40),
+    ToggleOn = Color3.fromRGB(0, 200, 255),
+    ToggleOff = Color3.fromRGB(60, 60, 60)
+}
+
+local function Round(obj, rad)
+    local c = Instance.new("UICorner", obj)
+    c.CornerRadius = UDim.new(0, rad)
+    return c
+end
+
+-- ====================================================
+-- PARTICLE SYSTEM
+-- ====================================================
+local ParticleList = {}
+local ParticlesActive = false
+
+local function CreateParticle(parent)
+    local p = Instance.new("Frame", parent)
+    p.Size = UDim2.fromOffset(math.random(1, 3), math.random(1, 3))
+    p.BackgroundColor3 = Color3.new(1, 1, 1)
+    p.BackgroundTransparency = math.random(2, 5) / 10
+    p.BorderSizePixel = 0
+    p.Position = UDim2.new(math.random(), 0, math.random(), 0)
+    Round(p, 100)
+    local velocity = Vector2.new(math.random(-20, 20) / 10000, math.random(-20, 20) / 10000)
+    return {obj = p, vel = velocity}
+end
+
+local function SetParticles(state, container)
+    ParticlesActive = state
+    if state then
+        for i = 1, 50 do table.insert(ParticleList, CreateParticle(container)) end
+    else
+        for _, v in pairs(ParticleList) do v.obj:Destroy() end
+        ParticleList = {}
+    end
+end
+
+-- ====================================================
+-- DRAGGABLE FUNCTION
+-- ====================================================
+local function MakeDraggable(frame, handle)
+    handle = handle or frame
+    local dragging, dragStart, startPos
+    handle.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true; dragStart = input.Position; startPos = frame.Position
+            input.Changed:Connect(function() if input.UserInputState == Enum.UserInputState.End then dragging = false end end)
+        end
+    end)
+    UIS.InputChanged:Connect(function(input)
+        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            local delta = input.Position - dragStart
+            frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end)
+end
+
+-- ====================================================
+-- UI BUILDER UTILS
+-- ====================================================
+local function CreateSection(parent, title)
+    local Section = Instance.new("Frame", parent); Section.Size = UDim2.new(1, 0, 0, 30); Section.BackgroundTransparency = 1; Section.ZIndex = parent.ZIndex + 1
+    local Title = Instance.new("TextLabel", Section); Title.Size = UDim2.new(1, 0, 1, 0); Title.Text = title:upper(); Title.Font = Enum.Font.GothamBold; Title.TextColor3 = Theme.Accent; Title.TextSize = 12; Title.TextXAlignment = "Left"; Title.BackgroundTransparency = 1; Title.ZIndex = Section.ZIndex
+    return Section
+end
+
+local function CreateToggle(parent, text, default, callback)
+    local ToggleFrame = Instance.new("Frame", parent); ToggleFrame.Size = UDim2.new(1, -10, 0, 35); ToggleFrame.BackgroundTransparency = 1; ToggleFrame.ZIndex = parent.ZIndex + 1
+    local Label = Instance.new("TextLabel", ToggleFrame); Label.Size = UDim2.new(1, -50, 1, 0); Label.Text = text; Label.Font = Enum.Font.Gotham; Label.TextColor3 = Theme.Text; Label.TextSize = 13; Label.TextXAlignment = "Left"; Label.BackgroundTransparency = 1; Label.ZIndex = ToggleFrame.ZIndex
+    local ToggleBG = Instance.new("Frame", ToggleFrame); ToggleBG.Size = UDim2.fromOffset(36, 18); ToggleBG.Position = UDim2.new(1, -40, 0.5, -9); ToggleBG.BackgroundColor3 = default and Theme.ToggleOn or Theme.ToggleOff; ToggleBG.ZIndex = ToggleFrame.ZIndex; Round(ToggleBG, 10)
+    local ToggleDot = Instance.new("Frame", ToggleBG); ToggleDot.Size = UDim2.fromOffset(12, 12); ToggleDot.Position = default and UDim2.new(0, 21, 0.5, -6) or UDim2.new(0, 3, 0.5, -6); ToggleDot.BackgroundColor3 = Color3.fromRGB(255, 255, 255); ToggleDot.ZIndex = ToggleFrame.ZIndex + 1; Round(ToggleDot, 100)
+    local ToggleButton = Instance.new("TextButton", ToggleFrame); ToggleButton.Size = UDim2.new(1, 0, 1, 0); ToggleButton.BackgroundTransparency = 1; ToggleButton.Text = ""; ToggleButton.ZIndex = ToggleFrame.ZIndex + 2
+    local State = default
+    ToggleButton.MouseButton1Click:Connect(function()
+        State = not State
+        TweenService:Create(ToggleBG, TweenInfo.new(0.2), {BackgroundColor3 = State and Theme.ToggleOn or Theme.ToggleOff}):Play()
+        TweenService:Create(ToggleDot, TweenInfo.new(0.2), {Position = State and UDim2.new(0, 21, 0.5, -6) or UDim2.new(0, 3, 0.5, -6)}):Play()
+        callback(State)
+    end)
+    return ToggleFrame
+end
+
+local function CreateTextBox(parent, placeholder, defaultText, callback)
+    local BoxFrame = Instance.new("Frame", parent); BoxFrame.Size = UDim2.new(1, -10, 0, 35); BoxFrame.BackgroundTransparency = 1; BoxFrame.ZIndex = parent.ZIndex + 1
+    local Label = Instance.new("TextLabel", BoxFrame); Label.Size = UDim2.new(1, -90, 1, 0); Label.Text = placeholder; Label.Font = Enum.Font.Gotham; Label.TextColor3 = Theme.Text; Label.TextSize = 13; Label.TextXAlignment = "Left"; Label.BackgroundTransparency = 1; Label.ZIndex = BoxFrame.ZIndex
+    local TextBox = Instance.new("TextBox", BoxFrame); TextBox.Size = UDim2.fromOffset(80, 24); TextBox.Position = UDim2.new(1, -85, 0.5, -12); TextBox.BackgroundColor3 = Color3.fromRGB(30, 30, 30); TextBox.TextColor3 = Theme.Text; TextBox.Text = tostring(defaultText); TextBox.Font = Enum.Font.GothamMedium; TextBox.TextSize = 12; TextBox.ZIndex = BoxFrame.ZIndex + 2; Round(TextBox, 6)
+    Instance.new("UIStroke", TextBox).Color = Theme.Stroke
+    TextBox.FocusLost:Connect(function()
+        callback(TextBox.Text)
+    end)
+    return BoxFrame
+end
+
+local function CreateButton(parent, text, callback)
+    local BtnFrame = Instance.new("Frame", parent); BtnFrame.Size = UDim2.new(1, -10, 0, 35); BtnFrame.BackgroundTransparency = 1; BtnFrame.ZIndex = parent.ZIndex + 1
+    local Button = Instance.new("TextButton", BtnFrame); Button.Size = UDim2.new(1, 0, 1, -4); Button.Position = UDim2.new(0, 0, 0, 2); Button.BackgroundColor3 = Theme.Button; Button.TextColor3 = Theme.Text; Button.Text = text; Button.Font = Enum.Font.GothamMedium; Button.TextSize = 13; Button.ZIndex = BtnFrame.ZIndex + 2; Round(Button, 6)
+    Instance.new("UIStroke", Button).Color = Theme.Stroke
+    Button.MouseButton1Click:Connect(callback)
+    return BtnFrame
+end
+
+-- ====================================================
+-- GHOST MINIMIZE & RESTORE
+-- ====================================================
+local RestoreBtn = Instance.new("Frame", Gui)
+RestoreBtn.Name = "RestoreButton"; RestoreBtn.Size = UDim2.fromOffset(100, 60); RestoreBtn.Position = UDim2.new(0, 30, 0.5, -30); RestoreBtn.BackgroundTransparency = 1; RestoreBtn.Visible = false; RestoreBtn.Active = true; RestoreBtn.ZIndex = 300
+local MinLogoText = Instance.new("TextLabel", RestoreBtn); MinLogoText.Size = UDim2.new(1, 0, 1, 0); MinLogoText.BackgroundTransparency = 1; MinLogoText.RichText = true; MinLogoText.Text = '<font face="GothamBlack" color="#FFFFFF" size="18">CIPHUB</font>\n<font face="GothamBold" color="#00C8FF" size="14">V99</font>'; MinLogoText.ZIndex = 305
+local GlowStroke = Instance.new("UIStroke", MinLogoText); GlowStroke.Color = Theme.Accent; GlowStroke.Thickness = 3; GlowStroke.Transparency = 0.6; GlowStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual
+local Shadow = Instance.new("UIStroke", MinLogoText); Shadow.Color = Color3.new(0, 0, 0); Shadow.Thickness = 3.5; Shadow.Transparency = 0.2
+local MinClick = Instance.new("TextButton", RestoreBtn); MinClick.Size = UDim2.new(1, 0, 1, 0); MinClick.BackgroundTransparency = 1; MinClick.Text = ""; MinClick.ZIndex = 310
+MakeDraggable(RestoreBtn, MinClick)
+
+-- ====================================================
+-- MAIN FRAME
+-- ====================================================
+local Main = Instance.new("Frame", Gui)
+Main.Size = UDim2.fromOffset(600, 350); Main.Position = UDim2.new(0.5, -300, 0.5, -175); Main.BackgroundColor3 = Theme.Main; Main.ClipsDescendants = true; Round(Main, 8)
+local MainStroke = Instance.new("UIStroke", Main); MainStroke.Color = Theme.Stroke; MainStroke.Thickness = 1
+
+local ParticleContainer = Instance.new("Frame", Main)
+ParticleContainer.Name = "ParticleContainer"; ParticleContainer.Size = UDim2.new(1, 0, 1, 0); ParticleContainer.BackgroundTransparency = 1; ParticleContainer.ZIndex = 1
+
+-- TOP BAR
+local TopBar = Instance.new("Frame", Main); TopBar.Size = UDim2.new(1, 0, 0, 30); TopBar.BackgroundColor3 = Color3.fromRGB(25, 25, 25); TopBar.BorderSizePixel = 0; TopBar.ZIndex = 101
+MakeDraggable(Main, TopBar)
+local LeftControls = Instance.new("Frame", TopBar); LeftControls.Size = UDim2.new(0, 70, 1, 0); LeftControls.Position = UDim2.new(0, 10, 0, 0); LeftControls.BackgroundTransparency = 1
+for i = 1, 3 do
+    local dot = Instance.new("Frame", LeftControls); dot.Size = UDim2.fromOffset(10, 10); dot.Position = UDim2.new(0, (i-1)*18, 0.5, -5); dot.BackgroundColor3 = ({Theme.Close, Theme.Minimize, Theme.Expand})[i]; dot.ZIndex = 102; Round(dot, 100)
+end
+
+-- SIDEBAR
+local Sidebar = Instance.new("Frame", Main); Sidebar.Size = UDim2.new(0, 180, 1, -30); Sidebar.Position = UDim2.new(0, 0, 0, 30); Sidebar.BackgroundColor3 = Theme.Sidebar; Sidebar.BorderSizePixel = 0; Sidebar.ZIndex = 2
+local TabHolder = Instance.new("ScrollingFrame", Sidebar); TabHolder.Size = UDim2.new(1, 0, 1, -120); TabHolder.Position = UDim2.new(0, 0, 0, 60); TabHolder.BackgroundTransparency = 1; TabHolder.ScrollBarThickness = 0; TabHolder.ZIndex = 3
+local TabListLayout = Instance.new("UIListLayout", TabHolder); TabListLayout.Padding = UDim.new(0, 5); TabListLayout.HorizontalAlignment = "Center"
+
+local LogoArea = Instance.new("Frame", Sidebar); LogoArea.Size = UDim2.new(1, 0, 0, 60); LogoArea.BackgroundTransparency = 1; LogoArea.ZIndex = 3
+local LogoText = Instance.new("TextLabel", LogoArea); LogoText.Size = UDim2.new(1, -20, 0, 30); LogoText.Position = UDim2.new(0, 15, 0, 15); LogoText.RichText = true; LogoText.Text = 'Ciphub<font color="rgb(0, 200, 255)">V99</font>'; LogoText.Font = Enum.Font.GothamBold; LogoText.TextColor3 = Theme.Text; LogoText.TextSize = 20; LogoText.TextXAlignment = "Left"; LogoText.BackgroundTransparency = 1; LogoText.ZIndex = 4
+
+local Content = Instance.new("Frame", Main); Content.Size = UDim2.new(1, -195, 1, -40); Content.Position = UDim2.new(0, 190, 0, 40); Content.BackgroundTransparency = 1; Content.ZIndex = 2
+local Pages = {}
+
+-- AVATAR PROFILE PANEL
+local UserPanel = Instance.new("Frame", Sidebar); UserPanel.Name = "UserPanel"; UserPanel.Size = UDim2.new(1, -16, 0, 50); UserPanel.Position = UDim2.new(0, 8, 1, -60); UserPanel.BackgroundColor3 = Color3.fromRGB(22, 22, 22); UserPanel.ZIndex = 3; Round(UserPanel, 8)
+Instance.new("UIStroke", UserPanel).Color = Theme.Stroke
+local AvatarImg = Instance.new("ImageLabel", UserPanel); AvatarImg.Size = UDim2.fromOffset(36, 36); AvatarImg.Position = UDim2.new(0, 7, 0.5, -18); AvatarImg.BackgroundColor3 = Color3.fromRGB(35, 35, 35); AvatarImg.Image = "rbxthumb://type=AvatarHeadShot&id="..LP.UserId.."&w=150&h=150"; AvatarImg.ZIndex = 4; Round(AvatarImg, 100)
+local DisplayNameLabel = Instance.new("TextLabel", UserPanel); DisplayNameLabel.Size = UDim2.new(1, -55, 0, 15); DisplayNameLabel.Position = UDim2.new(0, 50, 0, 10); DisplayNameLabel.Text = LP.DisplayName; DisplayNameLabel.Font = Enum.Font.GothamBold; DisplayNameLabel.TextColor3 = Theme.Text; DisplayNameLabel.TextSize = 12; DisplayNameLabel.TextXAlignment = "Left"; DisplayNameLabel.TextTruncate = Enum.TextTruncate.AtEnd; DisplayNameLabel.BackgroundTransparency = 1; DisplayNameLabel.ZIndex = 4
+local UsernameLabel = Instance.new("TextLabel", UserPanel); UsernameLabel.Size = UDim2.new(1, -55, 0, 15); UsernameLabel.Position = UDim2.new(0, 50, 0, 24); UsernameLabel.Text = "@"..LP.Name; UsernameLabel.Font = Enum.Font.Gotham; UsernameLabel.TextColor3 = Theme.SubText; UsernameLabel.TextSize = 10; UsernameLabel.TextXAlignment = "Left"; UsernameLabel.TextTruncate = Enum.TextTruncate.AtEnd; UsernameLabel.BackgroundTransparency = 1; UsernameLabel.ZIndex = 4
+
+-- ====================================================
+-- SETTINGS OVERLAY
+-- ====================================================
+local SettingsOverlay = Instance.new("ScrollingFrame", Main); SettingsOverlay.Name = "SettingsOverlay"; SettingsOverlay.Size = UDim2.new(1, -180, 1, -30); SettingsOverlay.Position = UDim2.new(0, 180, 1, 0); SettingsOverlay.BackgroundColor3 = Theme.Main; SettingsOverlay.ZIndex = 200; SettingsOverlay.BorderSizePixel = 0; SettingsOverlay.ScrollBarThickness = 0; SettingsOverlay.ClipsDescendants = true
+local SettingsLayout = Instance.new("UIListLayout", SettingsOverlay); SettingsLayout.Padding = UDim.new(0, 10)
+local SettingsPadding = Instance.new("UIPadding", SettingsOverlay); SettingsPadding.PaddingLeft = UDim.new(0, 15); SettingsPadding.PaddingTop = UDim.new(0, 10)
+
+CreateSection(SettingsOverlay, "UI Settings")
+CreateToggle(SettingsOverlay, "UI Transparan", false, function(state)
+    local trans = state and 0.3 or 0
+    TweenService:Create(Main, TweenInfo.new(0.3), {BackgroundTransparency = trans}):Play()
+    TweenService:Create(Sidebar, TweenInfo.new(0.3), {BackgroundTransparency = trans}):Play()
+end)
+CreateToggle(SettingsOverlay, "Show Avatar Profile", true, function(state) UserPanel.Visible = state end)
+CreateToggle(SettingsOverlay, "UI Blur Effect", true, function(v) Blur.Enabled = v end)
+CreateToggle(SettingsOverlay, "Background Particles", false, function(v) SetParticles(v, ParticleContainer) end)
+
+-- ====================================================
+-- TAB SYSTEM
+-- ====================================================
+local function CreateTab(name, icon)
+    local TabButton = Instance.new("TextButton", TabHolder); TabButton.Size = UDim2.new(1, -20, 0, 35); TabButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30); TabButton.BackgroundTransparency = 1; TabButton.Text = icon .. "  " .. name; TabButton.Font = Enum.Font.GothamMedium; TabButton.TextColor3 = Theme.SubText; TabButton.TextSize = 13; TabButton.ZIndex = 4; Round(TabButton, 6)
+    local Page = Instance.new("ScrollingFrame", Content); Page.Size = UDim2.new(1, 0, 1, 0); Page.BackgroundTransparency = 1; Page.Visible = false; Page.ScrollBarThickness = 0; Page.ZIndex = 5
+    local PageLayout = Instance.new("UIListLayout", Page); PageLayout.Padding = UDim.new(0, 10)
+    TabButton.MouseButton1Click:Connect(function()
+        for _, v in pairs(Pages) do v.Page.Visible = false; v.Button.BackgroundTransparency = 1; v.Button.TextColor3 = Theme.SubText end
+        Page.Visible = true; TabButton.BackgroundTransparency = 0.5; TabButton.TextColor3 = Theme.Accent
+    end)
+    Pages[name] = {Page = Page, Button = TabButton, Layout = PageLayout}
+    return Page
+end
+
+-- TOP BAR CONTROLS
+local RightControls = Instance.new("Frame", TopBar); RightControls.Size = UDim2.new(0, 130, 1, 0); RightControls.Position = UDim2.new(1, -135, 0, 0); RightControls.BackgroundTransparency = 1; RightControls.ZIndex = 110
+local function CreateTopBtn(text, pos, callback, fontSize, color)
+    local btn = Instance.new("TextButton", RightControls); btn.Size = UDim2.fromOffset(35, 30); btn.Position = pos; btn.BackgroundTransparency = 1; btn.Text = text; btn.Font = Enum.Font.GothamBold; btn.TextColor3 = color or Theme.Text; btn.TextSize = fontSize or 20; btn.ZIndex = 111
+    btn.MouseButton1Click:Connect(callback); return btn
+end
+
+local settingsOpen = false
+CreateTopBtn("⚙", UDim2.new(0, 0, 0, 0), function() 
+    settingsOpen = not settingsOpen
+    TweenService:Create(SettingsOverlay, TweenInfo.new(0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Position = settingsOpen and UDim2.new(0, 180, 0, 30) or UDim2.new(0, 180, 1, 0)}):Play() 
+end, 22)
+CreateTopBtn("-", UDim2.new(0, 45, 0, 0), function() Main.Visible = false; RestoreBtn.Visible = true; Blur.Enabled = false end, 32, Color3.fromRGB(0, 120, 255))
+CreateTopBtn("×", UDim2.new(0, 90, 0, 0), function() Gui:Destroy(); if Blur then Blur:Destroy() end end, 32, Color3.fromRGB(255, 50, 50))
+MinClick.MouseButton1Click:Connect(function() Main.Visible = true; RestoreBtn.Visible = false; Blur.Enabled = true end)
+
+-- ====================================================
+-- INITIALIZE TABS
+-- ====================================================
+local tabCipikMenu = CreateTab("CipikMenu", "🚪")
+local tabLt2Script  = CreateTab("Lt2 script", "🛠️")
+local tabMuscle     = CreateTab("Muscle Script", "💪")
+
+-- ====================================================
+-- TAB 1: CipikMenu (FEATURES INTEGRATION)
+-- ====================================================
+
+-- State Variables for Features
+local CameraFreezeState = false
+local LockedCameraCF = nil
+local InfiniteZoomState = false
+local ClickTpState = false
+local WalkSpeedState = false
+local WalkSpeedVal = 16
+local JumpHeightState = false
+local JumpHeightVal = 50
+local NoclipState = false
+local InfJumpState = false
+
+local EspState = false
+local EspName = false
+local EspHealth = false
+local EspDist = false
+
+-- Storage for ESP Objects
+local EspCache = {}
+
+-- GRUP FLAME 1: CAMERA
+CreateSection(tabCipikMenu, "CAMERA")
+
+CreateToggle(tabCipikMenu, "Freeze Camera", false, function(state)
+    CameraFreezeState = state
+    if state then
+        LockedCameraCF = Camera.CFrame
+    else
+        LockedCameraCF = nil
+    end
+end)
+
+CreateToggle(tabCipikMenu, "Zoom Tak Terbatas", false, function(state)
+    InfiniteZoomState = state
+    if state then
+        LP.CameraMaxZoomDistance = math.huge
+        LP.CameraMinZoomDistance = 0
+    else
+        LP.CameraMaxZoomDistance = 400
+        LP.CameraMinZoomDistance = 0.5
+    end
+end)
+
+CreateToggle(tabCipikMenu, "Tools Teleport (Click to TP)", false, function(state)
+    ClickTpState = state
+end)
+
+-- Click to TP Logic
+UIS.InputBegan:Connect(function(input, gameProcessed)
+    if not gameProcessed and ClickTpState and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
+        local mouse = LP:GetMouse()
+        if mouse.Target then
+            local char = LP.Character
+            if char and char:FindFirstChild("HumanoidRootPart") then
+                char.HumanoidRootPart.CFrame = CFrame.new(mouse.Hit.Position + Vector3.new(0, 3, 0))
+            end
+        end
+    end
+end)
+
+-- GRUP FLAME 2: PLAYER
+CreateSection(tabCipikMenu, "PLAYER")
+
+CreateToggle(tabCipikMenu, "Lari Cepat (WalkSpeed)", false, function(state)
+    WalkSpeedState = state
+end)
+
+CreateTextBox(tabCipikMenu, "Kecepatan Value", "16", function(txt)
+    local num = tonumber(txt)
+    if num then WalkSpeedVal = num end
+end)
+
+CreateToggle(tabCipikMenu, "Lompat Tinggi (JumpPower)", false, function(state)
+    JumpHeightState = state
+end)
+
+CreateTextBox(tabCipikMenu, "Ketinggian Value", "50", function(txt)
+    local num = tonumber(txt)
+    if num then JumpHeightVal = num end
+end)
+
+CreateToggle(tabCipikMenu, "Noclip", false, function(state)
+    NoclipState = state
+end)
+
+CreateToggle(tabCipikMenu, "Infinite Jump", false, function(state)
+    InfJumpState = state
+end)
+
+UIS.JumpRequest:Connect(function()
+    if InfJumpState then
+        local char = LP.Character
+        if char and char:FindFirstChildOfClass("Humanoid") then
+            char:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping)
+        end
+    end
+end)
+
+-- GRUP FLAME 3: WALLHACK (ESP)
+CreateSection(tabCipikMenu, "WALLHACK")
+
+CreateToggle(tabCipikMenu, "ESP Player", false, function(state)
+    EspState = state
+    if not state then
+        for _, obj in pairs(EspCache) do
+            if obj then obj:Destroy() end
+        end
+        EspCache = {}
+    end
+end)
+
+CreateToggle(tabCipikMenu, "ESP Name", false, function(state)
+    EspName = state
+end)
+
+CreateToggle(tabCipikMenu, "ESP Darah", false, function(state)
+    EspHealth = state
+end)
+
+CreateToggle(tabCipikMenu, "ESP Jarak", false, function(state)
+    EspDist = state
+end)
+
+-- GRUP FLAME 4: TELEPORT & SPECTATE
+CreateSection(tabCipikMenu, "TELEPORT & SPECTATE")
+
+local SelectedPlayerName = nil
+local SpectatingState = false
+
+-- Dropdown / Selector UI Implementation for Players
+local SelectorFrame = Instance.new("Frame", tabCipikMenu)
+SelectorFrame.Size = UDim2.new(1, -10, 0, 35)
+SelectorFrame.BackgroundTransparency = 1
+SelectorFrame.ZIndex = tabCipikMenu.ZIndex + 1
+
+local SelectorBtn = Instance.new("TextButton", SelectorFrame)
+SelectorBtn.Size = UDim2.new(1, 0, 1, -4)
+SelectorBtn.Position = UDim2.new(0, 0, 0, 2)
+SelectorBtn.BackgroundColor3 = Theme.Button
+SelectorBtn.TextColor3 = Theme.Text
+SelectorBtn.Text = "Select Player: [ None ]"
+SelectorBtn.Font = Enum.Font.GothamMedium
+SelectorBtn.TextSize = 13
+SelectorBtn.ZIndex = SelectorFrame.ZIndex + 2
+Round(SelectorBtn, 6)
+Instance.new("UIStroke", SelectorBtn).Color = Theme.Stroke
+
+-- Player Dropdown List Holder
+local DropdownListFrame = Instance.new("ScrollingFrame", tabCipikMenu)
+DropdownListFrame.Size = UDim2.new(1, -10, 0, 0)
+DropdownListFrame.BackgroundTransparency = 0
+DropdownListFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+DropdownListFrame.Visible = false
+DropdownListFrame.ZIndex = SelectorFrame.ZIndex + 10
+DropdownListFrame.ScrollBarThickness = 4
+Round(DropdownListFrame, 6)
+Instance.new("UIStroke", DropdownListFrame).Color = Theme.Stroke
+local DropdownLayout = Instance.new("UIListLayout", DropdownListFrame)
+DropdownLayout.Padding = UDim.new(0, 2)
+
+local dropdownOpen = false
+
+local function RefreshPlayerDropdown()
+    for _, child in pairs(DropdownListFrame:GetChildren()) do
+        if child:IsA("TextButton") then
+            child:Destroy()
+        end
+    end
+    
+    local count = 0
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= LP then
+            count = count + 1
+            local pBtn = Instance.new("TextButton", DropdownListFrame)
+            pBtn.Size = UDim2.new(1, 0, 0, 30)
+            pBtn.BackgroundTransparency = 1
+            pBtn.Text = p.Name
+            pBtn.Font = Enum.Font.Gotham
+            pBtn.TextColor3 = Theme.Text
+            pBtn.TextSize = 12
+            pBtn.ZIndex = DropdownListFrame.ZIndex + 1
+            
+            pBtn.MouseButton1Click:Connect(function()
+                SelectedPlayerName = p.Name
+                SelectorBtn.Text = "Select Player: " .. p.Name
+                DropdownListFrame.Visible = false
+                dropdownOpen = false
+                DropdownListFrame.Size = UDim2.new(1, -10, 0, 0)
+            end)
+        end
+    end
+    DropdownListFrame.Size = UDim2.new(1, -10, 0, math.clamp(count * 32, 0, 120))
+end
+
+SelectorBtn.MouseButton1Click:Connect(function()
+    dropdownOpen = not dropdownOpen
+    if dropdownOpen then
+        RefreshPlayerDropdown()
+        DropdownListFrame.Visible = true
+    else
+        DropdownListFrame.Visible = false
+        DropdownListFrame.Size = UDim2.new(1, -10, 0, 0)
+    end
+end)
+
+CreateButton(tabCipikMenu, "Refresh List Player", function()
+    RefreshPlayerDropdown()
+end)
+
+CreateButton(tabCipikMenu, "Select to TP Player", function()
+    if SelectedPlayerName then
+        local targetPlayer = Players:FindFirstChild(SelectedPlayerName)
+        if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+            local char = LP.Character
+            if char and char:FindFirstChild("HumanoidRootPart") then
+                char.HumanoidRootPart.CFrame = targetPlayer.Character.HumanoidRootPart.CFrame + Vector3.new(0, 3, 0)
+            end
+        end
+    end
+end)
+
+CreateToggle(tabCipikMenu, "Select to Spectate", false, function(state)
+    SpectatingState = state
+    if not state then
+        Camera.CameraSubject = LP.Character and LP.Character:FindFirstChildOfClass("Humanoid") or nil
+    end
+end)
+
+-- ====================================================
+-- TAB 2: Lt2 script (EXTRA SCRIPTS)
+-- ====================================================
+CreateSection(tabLt2Script, "Script Terbang")
+CreateButton(tabLt2Script, "Fly V3", function()
+    loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Fly-V3-50586"))()
+end)
+
+CreateSection(tabLt2Script, "Kronhub")
+CreateButton(tabLt2Script, "Kron Hub", function()
+    loadstring(game:HttpGet("https://rawscripts.net/raw/Lumber-Tycoon-2-Kron-Hub-20796"))()
+end)
+
+CreateSection(tabLt2Script, "Luaware")
+CreateButton(tabLt2Script, "Dark X V5", function()
+    loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Dark-x-v5-lumber-tycoon-2-103762"))()
+end)
+
+-- ====================================================
+-- TAB 3: Muscle Script (MUSCLE LEGENDS HUB)
+-- ====================================================
+CreateSection(tabMuscle, "Speedhub X")
+CreateButton(tabMuscle, "Speedhub X", function()
+    loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Speedhub-X-57586"))()
+end)
+
+-- ====================================================
+-- RUNTIME LOOPS & UPDATERS
+-- ====================================================
+RunService.RenderStepped:Connect(function()
+    -- Particles update
+    if ParticlesActive then
+        for _, p in pairs(ParticleList) do
+            local pos = p.obj.Position; local newX, newY = pos.X.Scale + p.vel.X, pos.Y.Scale + p.vel.Y
+            if newX > 1 or newX < 0 then p.vel = Vector2.new(-p.vel.X, p.vel.Y) end
+            if newY > 1 or newY < 0 then p.vel = Vector2.new(p.vel.X, -p.vel.Y) end
+            p.obj.Position = UDim2.new(newX, 0, newY, 0)
+        end
+    end
+
+    -- Scroll canvas resizing
+    for _, data in pairs(Pages) do 
+        if data.Page then data.Page.CanvasSize = UDim2.new(0, 0, 0, data.Layout.AbsoluteContentSize.Y + 20) end 
+    end
+    SettingsOverlay.CanvasSize = UDim2.new(0, 0, 0, SettingsLayout.AbsoluteContentSize.Y + 20)
+    TabHolder.CanvasSize = UDim2.new(0, 0, 0, TabListLayout.AbsoluteContentSize.Y + 10)
+
+    -- Player modifications (Speed, Jump, Noclip)
+    local char = LP.Character
+    if char then
+        local humanoid = char:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            if WalkSpeedState then humanoid.WalkSpeed = WalkSpeedVal end
+            if JumpHeightState then humanoid.JumpPower = JumpHeightVal end
+        end
+        if NoclipState then
+            for _, part in pairs(char:GetDescendants()) do
+                if part:IsA("BasePart") then part.CanCollide = false end
+            end
+        end
+    end
+
+    -- Fixed Camera Freeze Loop
+    if CameraFreezeState and LockedCameraCF then
+        Camera.CFrame = LockedCameraCF
+    elseif SpectatingState and SelectedPlayerName then
+        local targetPlayer = Players:FindFirstChild(SelectedPlayerName)
+        if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("Humanoid") then
+            Camera.CameraSubject = targetPlayer.Character:FindFirstChildOfClass("Humanoid")
+        end
+    end
+
+    -- ESP Loop Implementation (Highlight & Info)
+    if EspState then
+        for _, p in pairs(Players:GetPlayers()) do
+            if p ~= LP and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                local pChar = p.Character
+                local hrp = pChar.HumanoidRootPart
+                local hum = pChar:FindFirstChildOfClass("Humanoid")
+                
+                -- Highlight Check
+                local highlight = pChar:FindFirstChild("CipsHighlight")
+                if not highlight then
+                    highlight = Instance.new("Highlight")
+                    highlight.Name = "CipsHighlight"
+                    highlight.Adornee = pChar
+                    highlight.FillColor = Theme.Accent
+                    highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+                    highlight.FillTransparency = 0.5
+                    highlight.Parent = pChar
+                end
+                
+                -- Billboards / Info tags
+                local billboard = pChar:FindFirstChild("CipsBillboard")
+                if (EspName or EspHealth or EspDist) then
+                    if not billboard then
+                        billboard = Instance.new("BillboardGui")
+                        billboard.Name = "CipsBillboard"
+                        billboard.Size = UDim2.new(0, 200, 0, 50)
+                        billboard.StudsOffset = Vector3.new(0, 3, 0)
+                        billboard.AlwaysOnTop = true
+                        
+                        local textLabel = Instance.new("TextLabel", billboard)
+                        textLabel.Name = "InfoText"
+                        textLabel.Size = UDim2.new(1, 0, 1, 0)
+                        textLabel.BackgroundTransparency = 1
+                        textLabel.Font = Enum.Font.GothamBold
+                        textLabel.TextSize = 12
+                        textLabel.TextColor3 = Theme.Text
+                        textLabel.TextStrokeTransparency = 0.5
+                        
+                        billboard.Parent = pChar
+                    end
+                    
+                    local infoText = billboard:FindFirstChild("InfoText")
+                    if infoText then
+                        local infoString = ""
+                        if EspName then infoString = infoString .. p.Name .. "\n" end
+                        if EspHealth and hum then infoString = infoString .. "HP: " .. math.floor(hum.Health) .. "/" .. math.floor(hum.MaxHealth) .. "\n" end
+                        if EspDist and char and char:FindFirstChild("HumanoidRootPart") then
+                            local dist = math.floor((hrp.Position - char.HumanoidRootPart.Position).Magnitude)
+                            infoString = infoString .. "[" .. dist .. " studs]"
+                        end
+                        infoText.Text = infoString
+                        billboard.Enabled = true
+                    end
+                else
+                    if billboard then billboard.Enabled = false end
+                end
+            end
+        end
+    else
+        for _, p in pairs(Players:GetPlayers()) do
+            if p.Character then
+                local hl = p.Character:FindFirstChild("CipsHighlight")
+                if hl then hl:Destroy() end
+                local bb = p.Character:FindFirstChild("CipsBillboard")
+                if bb then bb:Destroy() end
+            end
+        end
+    end
+end)
+
+Pages["CipikMenu"].Button.BackgroundTransparency = 0.5
+Pages["CipikMenu"].Button.TextColor3 = Theme.Accent
+Pages["CipikMenu"].Page.Visible = true
+
+print("Ciphub V99: CipikMenu, Lt2 script & Muscle Script Loaded Successfully! 🌊")
